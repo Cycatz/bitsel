@@ -4,8 +4,10 @@
 #include <algorithm>
 #include <bitset>
 #include <cstddef>  // for size_t
+#include <initializer_list>
 #include <stdexcept>
 #include <string>  // for string
+
 
 class Bits
 {
@@ -22,6 +24,7 @@ public:
     {
         /* TODO: handle str.length() == 0 */
     }
+    Bits(std::initializer_list<Bits>);
 
     void reverse();
     constexpr std::size_t get_size() const { return m_len; }
@@ -35,6 +38,7 @@ public:
     /* TODO: define set operation */
 
     bool operator==(const Bits &) const;
+    Bits &operator+=(const Bits &);
     Bits &operator&=(const Bits &);
     Bits &operator|=(const Bits &);
     Bits &operator^=(const Bits &);
@@ -48,6 +52,13 @@ Bits::Bits(std::size_t len) : m_len{len}
         throw std::invalid_argument("The length must not be zero");
     }
     m_bitstr.resize(len, '0');
+}
+
+Bits::Bits(std::initializer_list<Bits> l) : m_len(0)
+{
+    for (const auto &b : l) {
+        (*this) += b;
+    }
 }
 
 constexpr bool Bits::check_range(std::size_t s, std::size_t e) const
@@ -83,6 +94,14 @@ Bits Bits::operator()(std::size_t s, std::size_t e) const
 bool Bits::operator==(const Bits &rhs) const
 {
     return m_bitstr == rhs.m_bitstr;
+}
+
+Bits &Bits::operator+=(const Bits &rhs)
+{
+    m_len += rhs.m_len;
+    m_bitstr += rhs.m_bitstr;
+
+    return (*this);
 }
 
 

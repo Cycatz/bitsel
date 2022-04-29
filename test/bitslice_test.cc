@@ -18,6 +18,14 @@ TEST(StringConstructorTest, SameIndex)
 }
 
 
+TEST(InitializerListConstructorTest, BasicTest)
+{
+    Bits b1{"0101"};
+    Bits b2{"1101"};
+
+    Bits b3 = {b1, b2};
+    EXPECT_TRUE(b3.to_string() == "01011101"s);
+}
 
 TEST(ToStringTestValid, ZeroArgument)
 {
