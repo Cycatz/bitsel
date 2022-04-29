@@ -11,28 +11,23 @@ class Bits
 {
 private:
     std::string m_bitstr;
-    std::size_t m_start, m_end;
+    std::size_t m_len;
 
-    constexpr bool check_range(std::size_t, std::size_t) const;
+
+    constexpr bool check_range(std::size_t s, std::size_t e) const;
 
 public:
-    explicit Bits(std::size_t s, std::size_t e = 0);
-    explicit Bits(const std::string &str)
-        : m_bitstr{str}, m_start{str.length() - 1}, m_end{0}
+    explicit Bits(std::size_t);
+    explicit Bits(const std::string &str) : m_bitstr{str}, m_len{str.length()}
     {
         /* TODO: handle str.length() == 0 */
     }
 
     void reverse();
-    constexpr std::size_t get_size() const { return m_start - m_end + 1; }
-    constexpr std::pair<std::size_t, std::size_t> get_width()
-    {
-        return std::make_pair(m_start, m_end);
-    }
+    constexpr std::size_t get_size() const { return m_len; }
 
-
-    std::string to_string() const { return to_string(m_start, m_end); }
-    std::string to_string(std::size_t s) const { return to_string(s, m_end); }
+    std::string to_string() const { return to_string(m_len - 1, 0); }
+    std::string to_string(std::size_t s) const { return to_string(s, 0); }
     std::string to_string(std::size_t, std::size_t) const;
 
     Bits operator()(std::size_t, std::size_t) const;
@@ -47,18 +42,17 @@ public:
 };
 
 
-Bits::Bits(std::size_t s, std::size_t e) : m_start{s}, m_end{e}
+Bits::Bits(std::size_t len) : m_len{len}
 {
-    if (0 != s && 0 != e) {
-        throw std::invalid_argument("Either start or end must be zero");
+    if (len == 0) {
+        throw std::invalid_argument("The length must not be zero");
     }
-    std::size_t sz = get_size();
-    m_bitstr.resize(sz, '0');
+    m_bitstr.resize(len, '0');
 }
 
 constexpr bool Bits::check_range(std::size_t s, std::size_t e) const
 {
-    return s >= e && m_start >= s && m_end <= e;
+    return s < m_len && s >= e;
 }
 
 void Bits::reverse()
@@ -88,8 +82,7 @@ Bits Bits::operator()(std::size_t s, std::size_t e) const
 
 bool Bits::operator==(const Bits &rhs) const
 {
-    return m_bitstr == rhs.m_bitstr && m_start == rhs.m_start &&
-           m_end == rhs.m_end;
+    return m_bitstr == rhs.m_bitstr;
 }
 
 

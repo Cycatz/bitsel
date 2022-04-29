@@ -21,42 +21,42 @@ TEST(StringConstructorTest, SameIndex)
 
 TEST(ToStringTestValid, ZeroArgument)
 {
-    Bits b1{3, 0};
+    Bits b1{4};
     EXPECT_TRUE(b1.to_string() == "0000"s);
 }
 TEST(ToStringTestValid, OneArgument)
 {
-    Bits b2{1, 0};
+    Bits b2{2};
     EXPECT_TRUE(b2.to_string(1) == "00"s);
 }
 TEST(ToStringTestValid, TwoArgument)
 {
-    Bits b3{5, 0};
+    Bits b3{6};
     EXPECT_TRUE(b3.to_string(3, 2) == "00"s);
 }
 
 
 TEST(ToStringTestInvalid, BasicTest1)
 {
-    Bits b1{3, 0};
+    Bits b1{4};
     EXPECT_TRUE(b1.to_string(5, 4) == ""s);
 }
 TEST(ToStringTestInvalid, BasicTest2)
 {
-    Bits b2{5, 0};
+    Bits b2{6};
     EXPECT_TRUE(b2.to_string(3, 4) == ""s);
 }
 
 
 TEST(SliceTestValid, BasicTest1)
 {
-    Bits b1a{3, 0}, b1b{2, 0};
+    Bits b1a{4}, b1b{3};
     EXPECT_TRUE(b1a(2, 0) == b1b);
     EXPECT_TRUE(b1a(2, 0).to_string() == "000"s);
 }
 TEST(SliceTestValid, BasicTest2)
 {
-    Bits b2a{5, 0}, b2b{2, 0};
+    Bits b2a{6}, b2b{3};
     EXPECT_TRUE(b2a(3, 1) == b2b);
     EXPECT_TRUE(b2a(3, 1).to_string() == "000"s);
 }
