@@ -95,37 +95,37 @@ TEST(ToStringTestValid, TwoArgument)
 // }
 
 
-// TEST(ANDTest, BasicTest)
-// {
-//     Bits a{"01010"};
-//     Bits b{"01100"};
+TEST(ANDTest, BasicTest)
+{
+    Bits a{"01010"};
+    Bits b{"01100"};
 
-//     a &= b;
-//     EXPECT_TRUE(a.to_string() == "01000"s);
-// }
+    a &= b;
+    EXPECT_TRUE(a.to_string() == "01000"s);
+}
 
-// TEST(ORTest, BasicTest)
-// {
-//     Bits a{"01010"};
-//     Bits b{"01100"};
+TEST(ORTest, BasicTest)
+{
+    Bits a{"01010"};
+    Bits b{"01100"};
 
-//     a |= b;
-//     EXPECT_TRUE(a.to_string() == "01110"s);
-// }
+    a |= b;
+    EXPECT_TRUE(a.to_string() == "01110"s);
+}
 
-// TEST(XORTest, BasicTest)
-// {
-//     Bits a{"01010"};
-//     Bits b{"01100"};
+TEST(XORTest, BasicTest)
+{
+    Bits a{"01010"};
+    Bits b{"01100"};
 
-//     a ^= b;
-//     EXPECT_TRUE(a.to_string() == "00110"s);
-// }
+    a ^= b;
+    EXPECT_TRUE(a.to_string() == "00110"s);
+}
 
-// TEST(NOTTest, BasicTest)
-// {
-//     Bits a{"01010"};
-//     Bits b{"10101"};
+TEST(NOTTest, BasicTest)
+{
+    Bits a{"01010"};
+    Bits b{"10101"};
 
-//     EXPECT_TRUE(~a == b);
-// }
+    EXPECT_TRUE(~a == b);
+}

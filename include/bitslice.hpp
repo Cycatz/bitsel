@@ -6,6 +6,7 @@
 #include <cstddef>  // for size_t
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>  // for string
 
@@ -16,11 +17,28 @@ private:
     using Block = uint32_t;
     static constexpr std::size_t block_size = sizeof(Block) * 8;
 
-    std::vector<Block> m_bitarr;
+    std::unique_ptr<Block[]> m_bitarr;
     std::size_t m_len;
 
-    std::pair<std::size_t, std::size_t> get_num_block(std::size_t) const;
-    bool check_range(std::size_t s, std::size_t e) const;
+    std::pair<std::size_t, std::size_t> get_num_block() const
+    {
+        return get_num_block(m_len);
+    }
+    std::pair<std::size_t, std::size_t> get_num_block(std::size_t s) const
+    {
+        return std::make_pair(s / block_size, s % block_size);
+    }
+    std::size_t get_arr_size() const { return get_arr_size(m_len); }
+    std::size_t get_arr_size(std::size_t s) const
+    {
+        auto p = get_num_block(s);
+        return p.first + static_cast<std::size_t>(p.second != 0);
+    }
+
+    bool check_range(std::size_t s, std::size_t e) const
+    {
+        return s < m_len && s >= e;
+    }
 
 public:
     explicit Bits(std::size_t);
@@ -38,7 +56,8 @@ public:
 
     bool test(std::size_t pos) const;
     bool operator[](std::size_t pos) const;
-    /* TODO: define set operation */
+
+    void set(std::size_t pos, bool val) const;
 
     bool operator==(const Bits &) const;
     Bits &operator+=(const Bits &);
@@ -48,21 +67,16 @@ public:
     Bits operator~() const;
 };
 
-std::pair<std::size_t, std::size_t> Bits::get_num_block(std::size_t s) const
-{
-    return std::make_pair(s / block_size, s % block_size);
-}
-
-bool Bits::check_range(std::size_t s, std::size_t e) const
-{
-    return s < m_len && s >= e;
-}
-
-
-Bits::Bits(std::size_t len) : m_len{len}
+Bits::Bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
 {
     if (len == 0) {
         throw std::invalid_argument("The length must not be zero");
+    }
+
+    std::size_t arr_size = get_arr_size();
+    m_bitarr = std::make_unique<Block[]>(arr_size);
+    for (std::size_t i = 0; i < arr_size; i++) {
+        m_bitarr[i] = 0;
     }
 }
 
@@ -79,16 +93,15 @@ Bits::Bits(const std::string &str) : m_len{str.length()}
         throw std::invalid_argument("The length must not be zero");
     }
 
-    auto p = get_num_block(m_len);
+    std::size_t arr_size = get_arr_size();
 
-    m_bitarr.reserve(p.first + static_cast<std::size_t>(!!p.second));
-
-    for (std::size_t i = 0; i < str.length(); i += block_size) {
+    m_bitarr = std::make_unique<Block[]>(arr_size);
+    for (std::size_t i = 0, j = 0; i < str.length(); i += block_size, j++) {
         Block curblk = 0;
         for (std::size_t k = std::min(str.length() - i, block_size); k-- > 0;) {
             curblk = curblk << 1 | static_cast<Block>(str[i + k] == '1');
         }
-        m_bitarr.push_back(curblk);
+        m_bitarr[j] = curblk;
     }
 }
 
@@ -105,6 +118,22 @@ bool Bits::operator[](std::size_t pos) const
 {
     auto p = get_num_block(pos);
     return static_cast<bool>((m_bitarr[p.first] >> p.second) & 1);
+}
+
+void Bits::set(std::size_t pos, bool val) const
+{
+    if (pos >= m_len) {
+        throw std::out_of_range("Position is out of range");
+    }
+
+    auto p = get_num_block(pos);
+    const Block mask = static_cast<Block>(val) << p.second;
+
+    if (m_bitarr[p.first] & (1 << p.second)) {
+        m_bitarr[p.first] &= mask;
+    } else {
+        m_bitarr[p.first] |= mask;
+    }
 }
 
 
@@ -145,7 +174,9 @@ bool Bits::operator==(const Bits &rhs) const
         return false;
     }
 
-    for (size_t i = 0; i < m_bitarr.size(); i++) {
+    std::size_t arr_size = get_arr_size(m_len);
+
+    for (size_t i = 0; i < arr_size; i++) {
         if (m_bitarr[i] != rhs.m_bitarr[i]) {
             return false;
         }
@@ -162,99 +193,88 @@ bool Bits::operator==(const Bits &rhs) const
 //}
 //
 //
-// Bits &Bits::operator&=(const Bits &rhs)
-//{
-//    std::size_t pos = 0;
-//    std::string b;
-//
-//    while (true) {
-//        if (pos >= m_bitstr.size() && pos >= rhs.m_bitstr.size()) {
-//            break;
-//        }
-//        auto c = [&]() {
-//            bool a = false;
-//            bool b = false;
-//            if (pos < m_bitstr.size()) {
-//                a = static_cast<bool>(m_bitstr[pos] - '0');
-//            }
-//            if (pos < rhs.m_bitstr.size()) {
-//                b = static_cast<bool>(rhs.m_bitstr[pos] - '0');
-//            }
-//            return static_cast<char>(static_cast<char>(a && b) + '0');
-//        }();
-//        b.push_back(c);
-//        pos++;
-//    }
-//
-//    m_bitstr = b;
-//    return (*this);
-//}
-// Bits &Bits::operator|=(const Bits &rhs)
-//{
-//    std::size_t pos = 0;
-//    std::string b;
-//
-//    while (true) {
-//        if (pos >= m_bitstr.size() && pos >= rhs.m_bitstr.size()) {
-//            break;
-//        }
-//        auto c = [&]() {
-//            bool a = false;
-//            bool b = false;
-//            if (pos < m_bitstr.size()) {
-//                a = static_cast<bool>(m_bitstr[pos] - '0');
-//            }
-//            if (pos < rhs.m_bitstr.size()) {
-//                b = static_cast<bool>(rhs.m_bitstr[pos] - '0');
-//            }
-//            return static_cast<char>(static_cast<char>(a || b) + '0');
-//        }();
-//        b.push_back(c);
-//        pos++;
-//    }
-//
-//    m_bitstr = b;
-//    return (*this);
-//}
-// Bits &Bits::operator^=(const Bits &rhs)
-//{
-//    std::size_t pos = 0;
-//    std::string b;
-//
-//    while (true) {
-//        if (pos >= m_bitstr.size() && pos >= rhs.m_bitstr.size()) {
-//            break;
-//        }
-//        auto c = [&]() {
-//            bool a = false;
-//            bool b = false;
-//            if (pos < m_bitstr.size()) {
-//                a = static_cast<bool>(m_bitstr[pos] - '0');
-//            }
-//            if (pos < rhs.m_bitstr.size()) {
-//                b = static_cast<bool>(rhs.m_bitstr[pos] - '0');
-//            }
-//            return static_cast<char>(static_cast<char>(a != b) + '0');
-//        }();
-//        b.push_back(c);
-//        pos++;
-//    }
-//
-//    m_bitstr = b;
-//    return (*this);
-//}
-// Bits Bits::operator~() const
-//{
-//    std::string b;
-//    std::for_each(m_bitstr.begin(), m_bitstr.end(), [&](char c) {
-//        if ('0' == c) {
-//            b.push_back('1');
-//        } else {
-//            b.push_back('0');
-//        }
-//    });
-//    return Bits{b};
-//}
+
+Bits &Bits::operator&=(const Bits &rhs)
+{
+    std::size_t old_arr_size = this->get_arr_size();
+    std::size_t rhs_arr_size = rhs.get_arr_size();
+    std::size_t new_arr_size =
+        get_arr_size(std::max(old_arr_size, rhs_arr_size));
+
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    for (size_t i = 0; i < new_arr_size; i++) {
+        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
+        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
+
+        new_bitarr[i] = x & y;
+    }
+
+    m_bitarr = std::move(new_bitarr);
+    m_len = std::max(m_len, rhs.m_len);
+
+    return (*this);
+}
+
+Bits &Bits::operator|=(const Bits &rhs)
+{
+    std::size_t old_arr_size = this->get_arr_size();
+    std::size_t rhs_arr_size = rhs.get_arr_size();
+    std::size_t new_arr_size =
+        get_arr_size(std::max(old_arr_size, rhs_arr_size));
+
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    for (size_t i = 0; i < new_arr_size; i++) {
+        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
+        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
+
+        new_bitarr[i] = x | y;
+    }
+
+    m_bitarr = std::move(new_bitarr);
+    m_len = std::max(m_len, rhs.m_len);
+
+    return (*this);
+}
+
+Bits &Bits::operator^=(const Bits &rhs)
+{
+    std::size_t old_arr_size = this->get_arr_size();
+    std::size_t rhs_arr_size = rhs.get_arr_size();
+    std::size_t new_arr_size =
+        get_arr_size(std::max(old_arr_size, rhs_arr_size));
+
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    for (size_t i = 0; i < new_arr_size; i++) {
+        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
+        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
+
+        new_bitarr[i] = x ^ y;
+    }
+
+    m_bitarr = std::move(new_bitarr);
+    m_len = std::max(m_len, rhs.m_len);
+
+    return (*this);
+}
+
+Bits Bits::operator~() const
+{
+    Bits b(m_len);
+    auto p = b.get_num_block();
+    std::size_t arr_size = b.get_arr_size();
+
+    for (std::size_t i = 0; i < arr_size; i++) {
+        b.m_bitarr[i] = ~m_bitarr[i];
+    }
+
+    if (p.second != 0) {
+        b.m_bitarr[arr_size - 1] =
+            (b.m_bitarr[arr_size - 1] << (block_size - p.second)) >>
+            (block_size - p.second);
+    }
+
+    return b;
+}
 
 
 #endif  // INCLUDE_BITSLICE_HPP_
