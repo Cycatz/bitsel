@@ -18,6 +18,21 @@ TEST(StringConstructorTest, LongStringTest)
     EXPECT_TRUE(b1.to_string() == "010100010101000100001010100010101000100001");
 }
 
+TEST(StringConstructorTest, ZeroLengthTest)
+{
+    EXPECT_THROW(
+        {
+            try {
+                Bits b{""};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("The length must not be zero", e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+}
+
+
 TEST(BitAccessTest, BasicTest)
 {
     Bits b1{"010100010101000100001010100010101000100001"};
@@ -26,18 +41,6 @@ TEST(BitAccessTest, BasicTest)
     EXPECT_FALSE(b1[38]);
     EXPECT_TRUE(b1[41]);
 }
-
-// TEST(StringConstructorTest, BasicTest)
-// {
-//     Bits b1{"0101"};
-//     EXPECT_TRUE(b1.to_string(3, 0) == "0101"s);
-// }
-// TEST(StringConstructorTest, SameIndex)
-// {
-//     Bits b2{"1"};
-//     EXPECT_TRUE(b2.to_string(0, 0) == "1"s);
-// }
-
 
 // TEST(InitializerListConstructorTest, BasicTest)
 // {
@@ -81,18 +84,19 @@ TEST(ToStringTestValid, TwoArgument)
 // }
 
 
-// TEST(SliceTestValid, BasicTest1)
-// {
-//     Bits b1a{4}, b1b{3};
-//     EXPECT_TRUE(b1a(2, 0) == b1b);
-//     EXPECT_TRUE(b1a(2, 0).to_string() == "000"s);
-// }
-// TEST(SliceTestValid, BasicTest2)
-// {
-//     Bits b2a{6}, b2b{3};
-//     EXPECT_TRUE(b2a(3, 1) == b2b);
-//     EXPECT_TRUE(b2a(3, 1).to_string() == "000"s);
-// }
+TEST(SliceTestValid, BasicTest)
+{
+    Bits b1a{4}, b1b{3};
+    EXPECT_TRUE(b1a(2, 0) == b1b);
+    EXPECT_TRUE(b1a(2, 0).to_string() == "000"s);
+}
+
+TEST(SliceTestValid, AdvancedTest)
+{
+    Bits b2a{"101010110101010010001001010101000000010101010000001000"};
+    Bits b2b{"10010001001010101000000010101010"};
+    EXPECT_TRUE(b2a(44, 13) == b2b);
+}
 
 
 TEST(ANDTest, BasicTest)
