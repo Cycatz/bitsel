@@ -169,7 +169,7 @@ std::string Bits::to_string(std::size_t s, std::size_t e) const
     std::string bitstr;
     bitstr.reserve(s - e + 1);
 
-    for (size_t i = e; i <= s; i++) {
+    for (size_t i = s + 1; i-- > e;) {
         bitstr.append(1, operator[](i) ? '1' : '0');
     }
     return bitstr;
