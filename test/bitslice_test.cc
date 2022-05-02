@@ -6,6 +6,14 @@
 
 using namespace std::string_literals;
 
+TEST(UIntConstructorTest, BasicTest)
+{
+    Bits b1{8, 0xAA};
+    EXPECT_TRUE(b1.to_string() == "10101010");
+}
+
+
+
 TEST(StringConstructorTest, BasicTest)
 {
     Bits b1{"0101"};

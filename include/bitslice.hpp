@@ -45,6 +45,7 @@ private:
 
 public:
     explicit Bits(std::size_t);
+    explicit Bits(std::size_t, int64_t);
     explicit Bits(const std::string &str);
     Bits(std::initializer_list<Bits>);
 
@@ -80,6 +81,19 @@ Bits::Bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
     m_bitarr = std::make_unique<Block[]>(arr_size);
     for (std::size_t i = 0; i < arr_size; i++) {
         m_bitarr[i] = 0;
+    }
+}
+
+Bits::Bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
+{
+    if (len == 0) {
+        throw std::invalid_argument("The length must not be zero");
+    }
+    std::size_t arr_size = get_arr_size();
+    m_bitarr = std::make_unique<Block[]>(arr_size);
+    for (std::size_t i = 0, j = 0; j < arr_size; i += block_size, j++) {
+        m_bitarr[j] = val & ((1ULL << std::min(m_len - i, block_size)) - 1);
+        val >>= block_size;
     }
 }
 
