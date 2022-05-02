@@ -40,6 +40,9 @@ private:
         return s < m_len && s >= e;
     }
 
+    Bits &do_operation(const Bits &,
+                       const std::function<Block(Block, Block)> &);
+
 public:
     explicit Bits(std::size_t);
     explicit Bits(const std::string &str);
@@ -194,7 +197,9 @@ bool Bits::operator==(const Bits &rhs) const
 //
 //
 
-Bits &Bits::operator&=(const Bits &rhs)
+
+Bits &Bits::do_operation(const Bits &rhs,
+                         const std::function<Block(Block, Block)> &op)
 {
     std::size_t old_arr_size = this->get_arr_size();
     std::size_t rhs_arr_size = rhs.get_arr_size();
@@ -206,55 +211,28 @@ Bits &Bits::operator&=(const Bits &rhs)
         Block x = i >= old_arr_size ? 0 : m_bitarr[i];
         Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
 
-        new_bitarr[i] = x & y;
+        new_bitarr[i] = op(x, y);
     }
 
     m_bitarr = std::move(new_bitarr);
     m_len = std::max(m_len, rhs.m_len);
 
     return (*this);
+}
+
+Bits &Bits::operator&=(const Bits &rhs)
+{
+    return do_operation(rhs, [](Block x, Block y) { return x & y; });
 }
 
 Bits &Bits::operator|=(const Bits &rhs)
 {
-    std::size_t old_arr_size = this->get_arr_size();
-    std::size_t rhs_arr_size = rhs.get_arr_size();
-    std::size_t new_arr_size =
-        get_arr_size(std::max(old_arr_size, rhs_arr_size));
-
-    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
-    for (size_t i = 0; i < new_arr_size; i++) {
-        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
-        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
-
-        new_bitarr[i] = x | y;
-    }
-
-    m_bitarr = std::move(new_bitarr);
-    m_len = std::max(m_len, rhs.m_len);
-
-    return (*this);
+    return do_operation(rhs, [](Block x, Block y) { return x | y; });
 }
 
 Bits &Bits::operator^=(const Bits &rhs)
 {
-    std::size_t old_arr_size = this->get_arr_size();
-    std::size_t rhs_arr_size = rhs.get_arr_size();
-    std::size_t new_arr_size =
-        get_arr_size(std::max(old_arr_size, rhs_arr_size));
-
-    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
-    for (size_t i = 0; i < new_arr_size; i++) {
-        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
-        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
-
-        new_bitarr[i] = x ^ y;
-    }
-
-    m_bitarr = std::move(new_bitarr);
-    m_len = std::max(m_len, rhs.m_len);
-
-    return (*this);
+    return do_operation(rhs, [](Block x, Block y) { return x ^ y; });
 }
 
 Bits Bits::operator~() const
