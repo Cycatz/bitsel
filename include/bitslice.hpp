@@ -9,13 +9,14 @@
 #include <memory>
 #include <stdexcept>
 #include <string>  // for string
+#include <limits>
 
 
 class Bits
 {
 private:
     using Block = uint32_t;
-    static constexpr std::size_t block_size = sizeof(Block) * 8;
+    static constexpr std::size_t block_size = std::numeric_limits<Block>::digits;
 
     std::unique_ptr<Block[]> m_bitarr;
     std::size_t m_len;
