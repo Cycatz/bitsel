@@ -111,12 +111,14 @@ Bits::Bits(const std::string &str) : m_len{str.length()}
     }
 
     std::size_t arr_size = get_arr_size();
+    std::string rev_str = str;
+    std::reverse(rev_str.begin(), rev_str.end());
 
     m_bitarr = std::make_unique<Block[]>(arr_size);
     for (std::size_t i = 0, j = 0; i < str.length(); i += block_size, j++) {
         Block curblk = 0;
         for (std::size_t k = std::min(str.length() - i, block_size); k-- > 0;) {
-            curblk = curblk << 1 | static_cast<Block>(str[i + k] == '1');
+            curblk = curblk << 1 | static_cast<Block>(rev_str[i + k] == '1');
         }
         m_bitarr[j] = curblk;
     }

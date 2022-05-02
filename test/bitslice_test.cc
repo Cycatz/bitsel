@@ -44,10 +44,10 @@ TEST(StringConstructorTest, ZeroLengthTest)
 TEST(BitAccessTest, BasicTest)
 {
     Bits b1{"010100010101000100001010100010101000100001"};
-    EXPECT_FALSE(b1[0]);
-    EXPECT_TRUE(b1[7]);
-    EXPECT_FALSE(b1[38]);
-    EXPECT_TRUE(b1[41]);
+    EXPECT_TRUE(b1[0]);
+    EXPECT_FALSE(b1[7]);
+    EXPECT_TRUE(b1[38]);
+    EXPECT_FALSE(b1[41]);
 }
 
 // TEST(InitializerListConstructorTest, BasicTest)
@@ -68,10 +68,10 @@ TEST(ToStringTestValid, ZeroArgument)
 TEST(ToStringTestValid, OneArgument)
 {
     Bits b1{"01000101010101000001001010101010010101001010"};
-    EXPECT_TRUE(b1.to_string(1) == "01");
-    EXPECT_TRUE(b1.to_string(4) == "01000");
+    EXPECT_TRUE(b1.to_string(1) == "10");
+    EXPECT_TRUE(b1.to_string(4) == "01010");
     EXPECT_TRUE(b1.to_string(40) ==
-                "01000101010101000001001010101010010101001");
+                "00101010101000001001010101010010101001010");
 }
 TEST(ToStringTestValid, TwoArgument)
 {
@@ -102,7 +102,7 @@ TEST(SliceTestValid, BasicTest)
 TEST(SliceTestValid, AdvancedTest)
 {
     Bits b2a{"101010110101010010001001010101000000010101010000001000"};
-    Bits b2b{"10010001001010101000000010101010"};
+    Bits b2b{"10101001000100101010100000001010"};
     EXPECT_TRUE(b2a(44, 13) == b2b);
 }
 
