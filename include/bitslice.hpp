@@ -372,6 +372,12 @@ bits operator^(bits lhs, const bits &rhs)
     return lhs;
 }
 
+std::ostream &operator<<(std::ostream &os, const bits &b)
+{
+    os << b.to_string();
+    return os;
+}
+
 }  // namespace bitslice
 
 
