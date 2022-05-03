@@ -348,6 +348,30 @@ bits bits::operator~() const
 
     return b;
 }
+
+
+bits operator+(bits lhs, const bits &rhs)
+{
+    lhs += rhs;
+    return lhs;
+}
+
+bits operator&(bits lhs, const bits &rhs)
+{
+    lhs &= rhs;
+    return lhs;
+}
+bits operator|(bits lhs, const bits &rhs)
+{
+    lhs |= rhs;
+    return lhs;
+}
+bits operator^(bits lhs, const bits &rhs)
+{
+    lhs ^= rhs;
+    return lhs;
+}
+
 }  // namespace bitslice
 
 

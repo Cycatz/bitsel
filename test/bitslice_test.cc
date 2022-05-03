@@ -185,27 +185,41 @@ TEST(ANDTest, BasicTest)
 {
     bits a{"01010"};
     bits b{"01100"};
+    bits c{"00101"};
 
     a &= b;
+
     EXPECT_TRUE(a.to_string() == "01000"s);
+
+
+    bits d = a & c;
+    EXPECT_TRUE(d.to_string() == "00000"s);
 }
 
 TEST(ORTest, BasicTest)
 {
     bits a{"01010"};
     bits b{"01100"};
+    bits c{"00101"};
 
     a |= b;
     EXPECT_TRUE(a.to_string() == "01110"s);
+
+    bits d = a | c;
+    EXPECT_TRUE(d.to_string() == "01111"s);
 }
 
 TEST(XORTest, BasicTest)
 {
     bits a{"01010"};
     bits b{"01100"};
+    bits c{"00101"};
 
     a ^= b;
     EXPECT_TRUE(a.to_string() == "00110"s);
+
+    bits d = a ^ c;
+    EXPECT_TRUE(d.to_string() == "00011"s);
 }
 
 TEST(NOTTest, BasicTest)
