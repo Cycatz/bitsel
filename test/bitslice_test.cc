@@ -142,6 +142,29 @@ TEST(SliceTestValid, AdvancedTest)
 }
 
 
+TEST(ConcatTest, BasicTest)
+{
+    Bits a{"01010"};
+    Bits b{"01100"};
+
+    a += b;
+    EXPECT_TRUE(a.to_string() == "0101001100"s);
+}
+
+TEST(ConcatTest, AdvancedTest)
+{
+    Bits a{
+        "0101011111111111111111111111111111111111111111111110000000000000100000"
+        "00"};
+    Bits b{"01100"};
+
+    a += b;
+    EXPECT_TRUE(
+        a.to_string() ==
+        "01010111111111111111111111111111111111111111111111100000000000001000000001100"s);
+}
+
+
 TEST(ANDTest, BasicTest)
 {
     Bits a{"01010"};

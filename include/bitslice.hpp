@@ -261,6 +261,34 @@ bool Bits::operator==(const Bits &rhs) const
 //
 //
 
+Bits &Bits::operator+=(const Bits &rhs)
+{
+    auto rhs_p = rhs.get_num_block();
+
+    std::size_t new_arr_size = get_arr_size(m_len + rhs.m_len);
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
+
+
+    std::size_t offset = rhs_p.second;
+    std::size_t init = rhs.get_arr_size() - 1;
+
+    /* Handle residue bits */
+    if (rhs_p.second != 0) {
+        new_bitarr[init++] |= m_bitarr[0] << offset;
+    }
+
+    for (std::size_t i = init, j = 0; i < new_arr_size; i++, j++) {
+        std::size_t upper_bits =
+            j + 1 < this->get_arr_size() ? (m_bitarr[j + 1] << offset) : 0;
+        std::size_t lower_bits = m_bitarr[j] >> (block_size - offset);
+        new_bitarr[i] = upper_bits | lower_bits;
+    }
+
+    m_len = m_len + rhs.m_len;
+    m_bitarr = std::move(new_bitarr);
+    return *this;
+}
 
 Bits &Bits::do_operation(const Bits &rhs,
                          const std::function<Block(Block, Block)> &op)
