@@ -137,6 +137,7 @@ Bits &Bits::operator=(const Bits &rhs)
     m_bitarr = std::move(new_bitarr);
     m_len = rhs.m_len;
 
+    std::copy_n(rhs.m_bitarr.get(), rhs.m_len, m_bitarr.get());
     return *this;
 }
 
