@@ -24,6 +24,7 @@ set(BITSLICE_SOURCES src/bitslice.cc)
 add_library(bitslice SHARED ${BITSLICE_SOURCES})
 
 set(BITSLICE_TEST_SOURCES test/bitslice_test.cc)
+set(BITSLICE_EXAMPLE_SOURCES example/example.cc)
 
 target_compile_options(
     bitslice PRIVATE
@@ -61,3 +62,9 @@ add_clang_format_target()
 # test
 ####################
 add_subdirectory(test)
+
+
+####################
+# example
+####################
+add_subdirectory(example)

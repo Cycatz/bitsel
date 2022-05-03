@@ -83,6 +83,11 @@ test: cmake
 	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) unit_tests
 	$(BUILD_PATH)/test/unit_tests
 
+.PHONY: example
+example: cmake
+	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) example
+	$(BUILD_PATH)/example/example
+
 .PHONY: format
 format: $(BUILD_PATH)/Makefile
 	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) clang-format
