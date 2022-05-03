@@ -85,14 +85,30 @@ TEST(BitAccessTest, BasicTest)
     EXPECT_FALSE(b1[41]);
 }
 
-// TEST(InitializerListConstructorTest, BasicTest)
-// {
-//     Bits b1{"0101"};
-//     Bits b2{"1101"};
+TEST(InitializerListConstructorTest, BasicTest)
+{
+    Bits b1{"0101"};
+    Bits b2{"1101"};
 
-//     Bits b3 = {b1, b2};
-//     EXPECT_TRUE(b3.to_string() == "01011101"s);
-// }
+    Bits b3 = {b1, b2};
+    EXPECT_TRUE(b3.to_string() == "01011101"s);
+}
+
+
+TEST(InitializerListConstructorTest, AdvancedTest)
+{
+    Bits b1{"0101101010101010101010101010101010000000001001"};
+    Bits b2{"1101101010101010101010101010101010001010101101"};
+    Bits b3{"1101111111111111111111111111111100000000000000"};
+    Bits b4{"1101111111111111111100000000000000011111111110"};
+
+    Bits b = {b1, b2, b3, b4};
+    EXPECT_TRUE(b.to_string() ==
+                "0101101010101010101010101010101010000000001001"
+                "1101101010101010101010101010101010001010101101"
+                "1101111111111111111111111111111100000000000000"
+                "1101111111111111111100000000000000011111111110"s);
+}
 
 TEST(ToStringTestValid, ZeroArgument)
 {

@@ -107,12 +107,13 @@ Bits::Bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
     }
 }
 
-// Bits::Bits(std::initializer_list<Bits> l) : m_len(0)
-// {
-//     for (const auto &b : l) {
-//         (*this) += b;
-//     }
-// }
+Bits::Bits(std::initializer_list<Bits> l) : m_len(0)
+{
+    *this = *l.begin();
+    for (auto it = std::next(l.begin()); it != l.end(); it++) {
+        *this += *it;
+    }
+}
 
 Bits::Bits(const Bits &other) : m_len{other.m_len}
 {
