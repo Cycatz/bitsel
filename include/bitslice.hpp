@@ -12,7 +12,9 @@
 #include <string>  // for string
 
 
-class Bits
+namespace bitslice
+{
+class bits
 {
 private:
     using Block = uint32_t;
@@ -42,22 +44,22 @@ private:
         return s < m_len && s >= e;
     }
 
-    Bits &do_operation(const Bits &,
+    bits &do_operation(const bits &,
                        const std::function<Block(Block, Block)> &);
 
 public:
-    Bits() = delete;
-    explicit Bits(std::size_t);
-    explicit Bits(std::size_t, int64_t);
-    explicit Bits(const std::string &str);
-    Bits(std::initializer_list<Bits>);
+    bits() = delete;
+    explicit bits(std::size_t);
+    explicit bits(std::size_t, int64_t);
+    explicit bits(const std::string &str);
+    bits(std::initializer_list<bits>);
 
-    Bits(const Bits &);             // copy constructor
-    Bits(Bits &&);                  // move constructor
-    Bits &operator=(const Bits &);  // copy assignment operator
-    Bits &operator=(Bits &&);       // move assignment operator
+    bits(const bits &);             // copy constructor
+    bits(bits &&);                  // move constructor
+    bits &operator=(const bits &);  // copy assignment operator
+    bits &operator=(bits &&);       // move assignment operator
 
-    ~Bits() = default;  // destructor
+    ~bits() = default;  // destructor
 
     void reverse();
     constexpr std::size_t get_size() const { return m_len; }
@@ -66,22 +68,22 @@ public:
     std::string to_string(std::size_t s) const { return to_string(s, 0); }
     std::string to_string(std::size_t, std::size_t) const;
 
-    Bits operator()(std::size_t, std::size_t) const;
+    bits operator()(std::size_t, std::size_t) const;
 
     bool test(std::size_t pos) const;
     bool operator[](std::size_t pos) const;
 
     void set(std::size_t pos, bool val) const;
 
-    bool operator==(const Bits &) const;
-    Bits &operator+=(const Bits &);
-    Bits &operator&=(const Bits &);
-    Bits &operator|=(const Bits &);
-    Bits &operator^=(const Bits &);
-    Bits operator~() const;
+    bool operator==(const bits &) const;
+    bits &operator+=(const bits &);
+    bits &operator&=(const bits &);
+    bits &operator|=(const bits &);
+    bits &operator^=(const bits &);
+    bits operator~() const;
 };
 
-Bits::Bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
+bits::bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
 {
     if (len == 0) {
         throw std::invalid_argument("The length must not be zero");
@@ -94,7 +96,7 @@ Bits::Bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
     }
 }
 
-Bits::Bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
+bits::bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
 {
     if (len == 0) {
         throw std::invalid_argument("The length must not be zero");
@@ -107,7 +109,7 @@ Bits::Bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
     }
 }
 
-Bits::Bits(std::initializer_list<Bits> l) : m_len(0)
+bits::bits(std::initializer_list<bits> l) : m_len(0)
 {
     *this = *l.begin();
     for (auto it = std::next(l.begin()); it != l.end(); it++) {
@@ -115,19 +117,19 @@ Bits::Bits(std::initializer_list<Bits> l) : m_len(0)
     }
 }
 
-Bits::Bits(const Bits &other) : m_len{other.m_len}
+bits::bits(const bits &other) : m_len{other.m_len}
 {
     std::size_t arr_size = other.get_arr_size();
     m_bitarr = std::make_unique<Block[]>(arr_size);
     std::copy_n(other.m_bitarr.get(), arr_size, m_bitarr.get());
 }
 
-Bits::Bits(Bits &&other) : m_bitarr{nullptr}, m_len{other.m_len}
+bits::bits(bits &&other) : m_bitarr{nullptr}, m_len{other.m_len}
 {
     std::swap(other.m_bitarr, m_bitarr);
 }
 
-Bits &Bits::operator=(const Bits &rhs)
+bits &bits::operator=(const bits &rhs)
 {
     if (this == &rhs) {
         return *this;
@@ -142,7 +144,7 @@ Bits &Bits::operator=(const Bits &rhs)
     return *this;
 }
 
-Bits &Bits::operator=(Bits &&rhs)
+bits &bits::operator=(bits &&rhs)
 {
     if (this == &rhs) {
         return *this;
@@ -153,7 +155,7 @@ Bits &Bits::operator=(Bits &&rhs)
     return *this;
 }
 
-Bits::Bits(const std::string &str) : m_len{str.length()}
+bits::bits(const std::string &str) : m_len{str.length()}
 {
     if (m_len == 0) {
         throw std::invalid_argument("The length must not be zero");
@@ -174,7 +176,7 @@ Bits::Bits(const std::string &str) : m_len{str.length()}
 }
 
 
-bool Bits::test(std::size_t pos) const
+bool bits::test(std::size_t pos) const
 {
     if (pos >= m_len) {
         throw std::out_of_range("Position is out of range");
@@ -182,13 +184,13 @@ bool Bits::test(std::size_t pos) const
     return this->operator[](pos);
 }
 
-bool Bits::operator[](std::size_t pos) const
+bool bits::operator[](std::size_t pos) const
 {
     auto p = get_num_block(pos);
     return static_cast<bool>((m_bitarr[p.first] >> p.second) & 1);
 }
 
-void Bits::set(std::size_t pos, bool val) const
+void bits::set(std::size_t pos, bool val) const
 {
     if (pos >= m_len) {
         throw std::out_of_range("Position is out of range");
@@ -211,7 +213,7 @@ void Bits::set(std::size_t pos, bool val) const
 // }
 //
 
-std::string Bits::to_string(std::size_t s, std::size_t e) const
+std::string bits::to_string(std::size_t s, std::size_t e) const
 {
     if (!check_range(s, e)) {
         return "";
@@ -226,17 +228,17 @@ std::string Bits::to_string(std::size_t s, std::size_t e) const
     return bitstr;
 }
 
-Bits Bits::operator()(std::size_t s, std::size_t e) const
+bits bits::operator()(std::size_t s, std::size_t e) const
 {
     if (!check_range(s, e)) {
         throw std::out_of_range("range error");
     }
 
     const std::string b = to_string(s, e);
-    return Bits(b);
+    return bits(b);
 }
 
-bool Bits::operator==(const Bits &rhs) const
+bool bits::operator==(const bits &rhs) const
 {
     if (m_len != rhs.m_len) {
         return false;
@@ -262,7 +264,7 @@ bool Bits::operator==(const Bits &rhs) const
 //
 //
 
-Bits &Bits::operator+=(const Bits &rhs)
+bits &bits::operator+=(const bits &rhs)
 {
     auto rhs_p = rhs.get_num_block();
 
@@ -291,7 +293,7 @@ Bits &Bits::operator+=(const Bits &rhs)
     return *this;
 }
 
-Bits &Bits::do_operation(const Bits &rhs,
+bits &bits::do_operation(const bits &rhs,
                          const std::function<Block(Block, Block)> &op)
 {
     std::size_t old_arr_size = this->get_arr_size();
@@ -313,24 +315,24 @@ Bits &Bits::do_operation(const Bits &rhs,
     return (*this);
 }
 
-Bits &Bits::operator&=(const Bits &rhs)
+bits &bits::operator&=(const bits &rhs)
 {
     return do_operation(rhs, [](Block x, Block y) { return x & y; });
 }
 
-Bits &Bits::operator|=(const Bits &rhs)
+bits &bits::operator|=(const bits &rhs)
 {
     return do_operation(rhs, [](Block x, Block y) { return x | y; });
 }
 
-Bits &Bits::operator^=(const Bits &rhs)
+bits &bits::operator^=(const bits &rhs)
 {
     return do_operation(rhs, [](Block x, Block y) { return x ^ y; });
 }
 
-Bits Bits::operator~() const
+bits bits::operator~() const
 {
-    Bits b(m_len);
+    bits b(m_len);
     auto p = b.get_num_block();
     std::size_t arr_size = b.get_arr_size();
 
@@ -346,6 +348,7 @@ Bits Bits::operator~() const
 
     return b;
 }
+}  // namespace bitslice
 
 
 #endif  // INCLUDE_BITSLICE_HPP_
