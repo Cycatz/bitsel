@@ -118,7 +118,7 @@ Bits::Bits(const Bits &other) : m_len{other.m_len}
 {
     std::size_t arr_size = other.get_arr_size();
     m_bitarr = std::make_unique<Block[]>(arr_size);
-    std::copy_n(other.m_bitarr.get(), other.m_len, m_bitarr.get());
+    std::copy_n(other.m_bitarr.get(), arr_size, m_bitarr.get());
 }
 
 Bits::Bits(Bits &&other) : m_bitarr{nullptr}, m_len{other.m_len}
@@ -137,7 +137,7 @@ Bits &Bits::operator=(const Bits &rhs)
     m_bitarr = std::move(new_bitarr);
     m_len = rhs.m_len;
 
-    std::copy_n(rhs.m_bitarr.get(), rhs.m_len, m_bitarr.get());
+    std::copy_n(rhs.m_bitarr.get(), arr_size, m_bitarr.get());
     return *this;
 }
 
