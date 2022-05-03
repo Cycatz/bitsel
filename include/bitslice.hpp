@@ -6,17 +6,18 @@
 #include <cstddef>  // for size_t
 #include <initializer_list>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>  // for string
-#include <limits>
 
 
 class Bits
 {
 private:
     using Block = uint32_t;
-    static constexpr std::size_t block_size = std::numeric_limits<Block>::digits;
+    static constexpr std::size_t block_size =
+        std::numeric_limits<Block>::digits;
 
     std::unique_ptr<Block[]> m_bitarr;
     std::size_t m_len;
@@ -45,10 +46,18 @@ private:
                        const std::function<Block(Block, Block)> &);
 
 public:
+    Bits() = delete;
     explicit Bits(std::size_t);
     explicit Bits(std::size_t, int64_t);
     explicit Bits(const std::string &str);
     Bits(std::initializer_list<Bits>);
+
+    Bits(const Bits &);             // copy constructor
+    Bits(Bits &&);                  // move constructor
+    Bits &operator=(const Bits &);  // copy assignment operator
+    Bits &operator=(Bits &&);       // move assignment operator
+
+    ~Bits() = default;  // destructor
 
     void reverse();
     constexpr std::size_t get_size() const { return m_len; }
@@ -104,6 +113,43 @@ Bits::Bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
 //         (*this) += b;
 //     }
 // }
+
+Bits::Bits(const Bits &other) : m_len{other.m_len}
+{
+    std::size_t arr_size = other.get_arr_size();
+    m_bitarr = std::make_unique<Block[]>(arr_size);
+    std::copy_n(other.m_bitarr.get(), other.m_len, m_bitarr.get());
+}
+
+Bits::Bits(Bits &&other) : m_bitarr{nullptr}, m_len{other.m_len}
+{
+    std::swap(other.m_bitarr, m_bitarr);
+}
+
+Bits &Bits::operator=(const Bits &rhs)
+{
+    if (this == &rhs) {
+        return *this;
+    }
+
+    std::size_t arr_size = rhs.get_arr_size();
+    auto new_bitarr = std::make_unique<Block[]>(arr_size);
+    m_bitarr = std::move(new_bitarr);
+    m_len = rhs.m_len;
+
+    return *this;
+}
+
+Bits &Bits::operator=(Bits &&rhs)
+{
+    if (this == &rhs) {
+        return *this;
+    }
+    std::swap(rhs.m_bitarr, m_bitarr);
+    std::swap(rhs.m_len, m_len);
+
+    return *this;
+}
 
 Bits::Bits(const std::string &str) : m_len{str.length()}
 {
