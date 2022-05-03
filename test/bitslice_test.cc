@@ -41,6 +41,41 @@ TEST(StringConstructorTest, ZeroLengthTest)
 }
 
 
+TEST(CopyConstructorTest, BasicTest)
+{
+    Bits b1{"010100010101000100001010100010101000100001"};
+    Bits b2(b1);
+    EXPECT_TRUE(b1 == b2);
+}
+
+
+TEST(MoveConstructorTest, BasicTest)
+{
+    Bits b1{"010100010101000100001010100010101000100001"};
+    Bits b2(std::move(b1));
+    EXPECT_TRUE(b2.to_string() == "010100010101000100001010100010101000100001");
+}
+
+
+TEST(CopyAssignmentTest, BasicTest)
+{
+    Bits b1{"010100010101000100001010100010101000100001"};
+    Bits b2{"01010001111l000100001010000010101000100001"};
+
+    b2 = b1;
+    EXPECT_TRUE(b1 == b2);
+}
+
+TEST(MoveAssignmentTest, BasicTest)
+{
+    Bits b1{"010100010101000100001010100010101000100001"};
+    Bits b2{"01010001111l000100001010000010101000100001"};
+
+    b2 = std::move(b1);
+    EXPECT_TRUE(b2.to_string() == "010100010101000100001010100010101000100001");
+}
+
+
 TEST(BitAccessTest, BasicTest)
 {
     Bits b1{"010100010101000100001010100010101000100001"};
