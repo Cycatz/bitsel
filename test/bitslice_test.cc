@@ -147,7 +147,7 @@ TEST(SliceTestValid, BasicTest)
 {
     bits b1a{4}, b2a{"010101000"};
     EXPECT_TRUE(b1a(2, 0).to_string() == "000"s);
-    EXPECT_TRUE(b2a(3, 0).to_string() == "1000"s);
+    EXPECT_TRUE(b2a(3).to_string() == "1000"s);
 }
 
 TEST(SliceTestValid, AdvancedTest)
