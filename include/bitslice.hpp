@@ -380,7 +380,98 @@ std::ostream &operator<<(std::ostream &os, const bits &b)
     return os;
 }
 
+
+namespace literals
+{
+
+// clang-format off
+
+// Generated with:
+// for i in {1..64}; do
+//     printf 'bits operator"" _%d(unsigned long long n) { return bits{%d, n}; }\n' "$i" "$i"
+// done
+
+bits operator"" _1(unsigned long long n) { return bits{1, n}; }
+bits operator"" _2(unsigned long long n) { return bits{2, n}; }
+bits operator"" _3(unsigned long long n) { return bits{3, n}; }
+bits operator"" _4(unsigned long long n) { return bits{4, n}; }
+bits operator"" _5(unsigned long long n) { return bits{5, n}; }
+bits operator"" _6(unsigned long long n) { return bits{6, n}; }
+bits operator"" _7(unsigned long long n) { return bits{7, n}; }
+bits operator"" _8(unsigned long long n) { return bits{8, n}; }
+bits operator"" _9(unsigned long long n) { return bits{9, n}; }
+bits operator"" _10(unsigned long long n) { return bits{10, n}; }
+bits operator"" _11(unsigned long long n) { return bits{11, n}; }
+bits operator"" _12(unsigned long long n) { return bits{12, n}; }
+bits operator"" _13(unsigned long long n) { return bits{13, n}; }
+bits operator"" _14(unsigned long long n) { return bits{14, n}; }
+bits operator"" _15(unsigned long long n) { return bits{15, n}; }
+bits operator"" _16(unsigned long long n) { return bits{16, n}; }
+bits operator"" _17(unsigned long long n) { return bits{17, n}; }
+bits operator"" _18(unsigned long long n) { return bits{18, n}; }
+bits operator"" _19(unsigned long long n) { return bits{19, n}; }
+bits operator"" _20(unsigned long long n) { return bits{20, n}; }
+bits operator"" _21(unsigned long long n) { return bits{21, n}; }
+bits operator"" _22(unsigned long long n) { return bits{22, n}; }
+bits operator"" _23(unsigned long long n) { return bits{23, n}; }
+bits operator"" _24(unsigned long long n) { return bits{24, n}; }
+bits operator"" _25(unsigned long long n) { return bits{25, n}; }
+bits operator"" _26(unsigned long long n) { return bits{26, n}; }
+bits operator"" _27(unsigned long long n) { return bits{27, n}; }
+bits operator"" _28(unsigned long long n) { return bits{28, n}; }
+bits operator"" _29(unsigned long long n) { return bits{29, n}; }
+bits operator"" _30(unsigned long long n) { return bits{30, n}; }
+bits operator"" _31(unsigned long long n) { return bits{31, n}; }
+bits operator"" _32(unsigned long long n) { return bits{32, n}; }
+bits operator"" _33(unsigned long long n) { return bits{33, n}; }
+bits operator"" _34(unsigned long long n) { return bits{34, n}; }
+bits operator"" _35(unsigned long long n) { return bits{35, n}; }
+bits operator"" _36(unsigned long long n) { return bits{36, n}; }
+bits operator"" _37(unsigned long long n) { return bits{37, n}; }
+bits operator"" _38(unsigned long long n) { return bits{38, n}; }
+bits operator"" _39(unsigned long long n) { return bits{39, n}; }
+bits operator"" _40(unsigned long long n) { return bits{40, n}; }
+bits operator"" _41(unsigned long long n) { return bits{41, n}; }
+bits operator"" _42(unsigned long long n) { return bits{42, n}; }
+bits operator"" _43(unsigned long long n) { return bits{43, n}; }
+bits operator"" _44(unsigned long long n) { return bits{44, n}; }
+bits operator"" _45(unsigned long long n) { return bits{45, n}; }
+bits operator"" _46(unsigned long long n) { return bits{46, n}; }
+bits operator"" _47(unsigned long long n) { return bits{47, n}; }
+bits operator"" _48(unsigned long long n) { return bits{48, n}; }
+bits operator"" _49(unsigned long long n) { return bits{49, n}; }
+bits operator"" _50(unsigned long long n) { return bits{50, n}; }
+bits operator"" _51(unsigned long long n) { return bits{51, n}; }
+bits operator"" _52(unsigned long long n) { return bits{52, n}; }
+bits operator"" _53(unsigned long long n) { return bits{53, n}; }
+bits operator"" _54(unsigned long long n) { return bits{54, n}; }
+bits operator"" _55(unsigned long long n) { return bits{55, n}; }
+bits operator"" _56(unsigned long long n) { return bits{56, n}; }
+bits operator"" _57(unsigned long long n) { return bits{57, n}; }
+bits operator"" _58(unsigned long long n) { return bits{58, n}; }
+bits operator"" _59(unsigned long long n) { return bits{59, n}; }
+bits operator"" _60(unsigned long long n) { return bits{60, n}; }
+bits operator"" _61(unsigned long long n) { return bits{61, n}; }
+bits operator"" _62(unsigned long long n) { return bits{62, n}; }
+bits operator"" _63(unsigned long long n) { return bits{63, n}; }
+bits operator"" _64(unsigned long long n) { return bits{64, n}; }
+// clang-format on
+
+bits operator"" _b(unsigned long long n)
+{
+    /* Set default length to 64 */
+    return bits{64, n};
+}
+
+
+bits operator"" _b(const char *str, std::size_t sz)
+{
+    return bits(std::string{str, sz});
+}
+
+}  // namespace literals
+
 }  // namespace bitslice
 
 
-#endif  // INCLUDE_BITSLICE_HPP_
+#endif  // INCLUDE_BITS_HPP_
