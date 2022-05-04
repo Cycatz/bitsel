@@ -50,7 +50,7 @@ private:
 public:
     bits() = delete;
     explicit bits(std::size_t);
-    explicit bits(std::size_t, int64_t);
+    explicit bits(std::size_t, uint64_t);
     explicit bits(const std::string &str);
     bits(std::initializer_list<bits>);
 
@@ -96,7 +96,7 @@ bits::bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
     }
 }
 
-bits::bits(std::size_t len, int64_t val) : m_bitarr{nullptr}, m_len{len}
+bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
 {
     if (len == 0) {
         throw std::invalid_argument("The length must not be zero");
