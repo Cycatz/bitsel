@@ -68,6 +68,7 @@ public:
     std::string to_string(std::size_t s) const { return to_string(s, 0); }
     std::string to_string(std::size_t, std::size_t) const;
 
+    bits operator()(std::size_t s) const { return operator()(s, 0); }
     bits operator()(std::size_t, std::size_t) const;
 
     bool test(std::size_t pos) const;
