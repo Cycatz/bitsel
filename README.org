@@ -1,0 +1,22 @@
+* Bitscuit
+Header-only C++14 library provides a class ~bitscuit~ that represents a variable-size sequence of bits.
+
+Inspired from ~std::bitsets~ and /Verilog/ syntax of data representation and operations.
+
+** Features
++ C++14
++ Header-only
++ Dependency-free
++ MIT License
+
+** Examples
+
+** Integration
+
+** Compiler compatibility
+
+** Roadmap
+
+** Changelog
+
+** Acknowledgements
