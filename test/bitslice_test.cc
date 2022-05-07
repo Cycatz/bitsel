@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#include <gtest/gtest_pred_impl.h>
 
 #include "bitslice.hpp"
 
@@ -158,26 +159,72 @@ TEST(SliceTestValid, AdvancedTest)
 }
 
 
-TEST(ConcatTest, BasicTest)
+TEST(RepeatTest, BasicTest)
+{
+    bits a{"01010"};
+
+    a.repeat(3);
+    EXPECT_TRUE(a.to_string() == "010100101001010"s);
+}
+
+
+TEST(AppendTest, BasicTest)
 {
     bits a{"01010"};
     bits b{"01100"};
 
-    a += b;
+    a.append(b);
     EXPECT_TRUE(a.to_string() == "0101001100"s);
 }
 
-TEST(ConcatTest, AdvancedTest)
+TEST(AppendTest, AdvancedTest)
 {
     bits a{
         "0101011111111111111111111111111111111111111111111110000000000000100000"
         "00"};
     bits b{"01100"};
 
-    a += b;
+    a.append(b);
     EXPECT_TRUE(
         a.to_string() ==
         "01010111111111111111111111111111111111111111111111100000000000001000000001100"s);
+}
+
+TEST(ReplicationTest, BasicTest)
+{
+    bits a{"011"};
+
+    bits b = repl(2, repl(3, a));
+    EXPECT_TRUE(b.to_string() == "011011011011011011"s);
+}
+
+TEST(ConcatTest, BasicTest)
+{
+    bits a{"01010"};
+    bits b{"01100"};
+    bits c{"11001"};
+
+    bits d = concat(a, concat(b, c));
+    EXPECT_TRUE(d.to_string() == "010100110011001"s);
+}
+
+TEST(AdditionTest, BasicTest)
+{
+    bits a{"010"};
+    bits b{"110"};
+    bits c = a + b;
+
+    EXPECT_TRUE(c.to_string() == "010110"s);
+}
+
+TEST(MultiplicationTest, BasicTest)
+{
+    bits a{"101"};
+    bits b = 3 * a;
+    bits c = 2 * b;
+
+    EXPECT_TRUE(b.to_string() == "101101101"s);
+    EXPECT_TRUE(c.to_string() == "101101101101101101"s);
 }
 
 

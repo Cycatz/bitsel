@@ -65,6 +65,9 @@ public:
     void reverse();
     constexpr std::size_t get_size() const { return m_len; }
 
+    bits &repeat(uint64_t);
+    bits &append(const bits &);
+
     std::string to_string() const { return to_string(m_len - 1, 0); }
     std::string to_string(std::size_t s) const { return to_string(s, 0); }
     std::string to_string(std::size_t, std::size_t) const;
@@ -78,6 +81,7 @@ public:
     void set(std::size_t pos, bool val) const;
 
     bool operator==(const bits &) const;
+    bits &operator*=(uint64_t);
     bits &operator+=(const bits &);
     bits &operator&=(const bits &);
     bits &operator|=(const bits &);
@@ -115,7 +119,7 @@ bits::bits(std::initializer_list<bits> l) : m_len(0)
 {
     *this = *l.begin();
     for (auto it = std::next(l.begin()); it != l.end(); it++) {
-        *this += *it;
+        this->append(*it);
     }
 }
 
@@ -215,6 +219,50 @@ void bits::set(std::size_t pos, bool val) const
 // }
 //
 
+bits &bits::repeat(uint64_t times)
+{
+    if (times == 0) {
+        throw std::invalid_argument("The times must not be zero");
+    }
+
+    /* Save the origin value; */
+    const bits b{*this};
+
+    for (uint64_t i = 0; i < times - 1; i++) {
+        this->append(b);
+    }
+    return *this;
+}
+
+bits &bits::append(const bits &rhs)
+{
+    auto rhs_p = rhs.get_num_block();
+
+    std::size_t new_arr_size = get_arr_size(m_len + rhs.m_len);
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
+
+
+    std::size_t offset = rhs_p.second;
+    std::size_t init = rhs.get_arr_size() - 1;
+
+    /* Handle residue bits */
+    if (rhs_p.second != 0) {
+        new_bitarr[init++] |= m_bitarr[0] << offset;
+    }
+
+    for (std::size_t i = init, j = 0; i < new_arr_size; i++, j++) {
+        std::size_t upper_bits =
+            j + 1 < this->get_arr_size() ? (m_bitarr[j + 1] << offset) : 0;
+        std::size_t lower_bits = m_bitarr[j] >> (block_size - offset);
+        new_bitarr[i] = upper_bits | lower_bits;
+    }
+
+    m_len = m_len + rhs.m_len;
+    m_bitarr = std::move(new_bitarr);
+    return *this;
+}
+
 std::string bits::to_string(std::size_t s, std::size_t e) const
 {
     if (!check_range(s, e)) {
@@ -268,31 +316,12 @@ bool bits::operator==(const bits &rhs) const
 
 bits &bits::operator+=(const bits &rhs)
 {
-    auto rhs_p = rhs.get_num_block();
+    return this->append(rhs);
+}
 
-    std::size_t new_arr_size = get_arr_size(m_len + rhs.m_len);
-    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
-    std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
-
-
-    std::size_t offset = rhs_p.second;
-    std::size_t init = rhs.get_arr_size() - 1;
-
-    /* Handle residue bits */
-    if (rhs_p.second != 0) {
-        new_bitarr[init++] |= m_bitarr[0] << offset;
-    }
-
-    for (std::size_t i = init, j = 0; i < new_arr_size; i++, j++) {
-        std::size_t upper_bits =
-            j + 1 < this->get_arr_size() ? (m_bitarr[j + 1] << offset) : 0;
-        std::size_t lower_bits = m_bitarr[j] >> (block_size - offset);
-        new_bitarr[i] = upper_bits | lower_bits;
-    }
-
-    m_len = m_len + rhs.m_len;
-    m_bitarr = std::move(new_bitarr);
-    return *this;
+bits &bits::operator*=(uint64_t times)
+{
+    return this->repeat(times);
 }
 
 bits &bits::do_operation(const bits &rhs,
@@ -351,11 +380,31 @@ bits bits::operator~() const
     return b;
 }
 
+bits repl(uint64_t times, bits b)
+{
+    if (times == 0) {
+        throw std::invalid_argument("The times must not be zero");
+    }
+    return b.repeat(times);
+}
+
+
+bits concat(bits lhs, const bits &rhs)
+{
+    lhs.append(rhs);
+    return lhs;
+}
 
 bits operator+(bits lhs, const bits &rhs)
 {
     lhs += rhs;
     return lhs;
+}
+
+bits operator*(uint64_t times, bits b)
+{
+    b *= times;
+    return b;
 }
 
 bits operator&(bits lhs, const bits &rhs)
