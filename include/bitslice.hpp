@@ -48,6 +48,8 @@ private:
     bits &do_operation(const bits &,
                        const std::function<Block(Block, Block)> &);
 
+    Block get_block(uint64_t pos);
+
 public:
     bits() = delete;
     explicit bits(std::size_t);
@@ -81,6 +83,9 @@ public:
     void set(std::size_t pos, bool val) const;
 
     bool operator==(const bits &) const;
+
+    bits &operator>>=(uint64_t);
+    bits &operator<<=(uint64_t);
     bits &operator*=(uint64_t);
     bits &operator+=(const bits &);
     bits &operator&=(const bits &);
@@ -314,6 +319,78 @@ bool bits::operator==(const bits &rhs) const
 //
 //
 
+bits::Block bits::get_block(uint64_t pos)
+{
+    auto p = get_num_block(pos);
+
+    if (p.second == 0) {
+        return m_bitarr[p.first];
+    }
+
+    Block lower_bits = m_bitarr[p.first] >> p.second;
+    /* TODO: padded with the sign bit */
+    Block upper_bits = p.first + 1 < this->get_arr_size()
+                           ? (m_bitarr[p.first + 1] << (block_size - p.second))
+                           : 0;
+
+    return upper_bits | lower_bits;
+}
+
+bits &bits::operator>>=(uint64_t val)
+{
+    std::size_t cnt = 0;
+    std::size_t arr_size = get_arr_size();
+
+    for (std::size_t pos = val; pos < m_len; pos += block_size) {
+        m_bitarr[cnt++] = get_block(pos);
+    }
+    while (cnt < arr_size) {
+        /* TODO: padded with the sign bit */
+        m_bitarr[cnt++] = 0;
+    }
+    return *this;
+}
+
+bits &bits::operator<<=(uint64_t val)
+{
+    /* Fill values from the end to avoid overwriting */
+    if (m_len <= val) {
+        /* all zeros */
+        for (std::size_t i = 0; i < get_arr_size(); i++) {
+            m_bitarr[i] = 0;
+        }
+        return *this;
+    }
+
+    std::size_t arr_size = get_arr_size();
+    std::size_t pos = arr_size * block_size - val;
+    std::size_t arr_pos = arr_size;
+
+    auto p = get_num_block();
+
+    while (true) {
+        if (pos >= block_size) {
+            pos -= block_size;
+            m_bitarr[--arr_pos] = get_block(pos);
+        } else {
+            /* residue */
+            m_bitarr[--arr_pos] = m_bitarr[0] << (block_size - pos);
+            break;
+        }
+    }
+    for (std::size_t i = 0; i < arr_pos; i++) {
+        m_bitarr[i] = 0;
+    }
+
+    /* Reset outbound bits to zero */
+    if (p.second != 0) {
+        m_bitarr[arr_size - 1] &= ((1 << p.second) - 1);
+    }
+
+    return *this;
+}
+
+
 bits &bits::operator+=(const bits &rhs)
 {
     return this->append(rhs);
@@ -394,6 +471,19 @@ bits concat(bits lhs, const bits &rhs)
     lhs.append(rhs);
     return lhs;
 }
+
+bits operator>>(bits b, uint64_t val)
+{
+    b >>= val;
+    return b;
+}
+
+bits operator<<(bits b, uint64_t val)
+{
+    b <<= val;
+    return b;
+}
+
 
 bits operator+(bits lhs, const bits &rhs)
 {

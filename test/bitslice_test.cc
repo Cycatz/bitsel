@@ -5,6 +5,7 @@
 #include "bitslice.hpp"
 
 using namespace bitslice;
+using namespace bitslice::literals;
 using namespace std::string_literals;
 
 TEST(UIntConstructorTest, BasicTest)
@@ -206,6 +207,54 @@ TEST(ConcatTest, BasicTest)
 
     bits d = concat(a, concat(b, c));
     EXPECT_TRUE(d.to_string() == "010100110011001"s);
+}
+
+
+TEST(RightShiftTest, BasicTest)
+{
+    bits a{64, 0xDEADBEEF12345678};
+    a >>= 4;
+    EXPECT_TRUE(a == 0x0DEADBEEF1234567_64);
+    a >>= 1;
+    EXPECT_TRUE(a == 0x06F56DF77891A2B3_64);
+    a >>= 7;
+    EXPECT_TRUE(a == 0x000DEADBEEF12345_64);
+    a >>= 20;
+    EXPECT_TRUE(a == 0x00000000DEADBEEF_64);
+    a >>= 100000;
+    EXPECT_TRUE(a == 0_64);
+}
+
+TEST(LeftShiftTest, TwoBlockTest)
+{
+    bits a{36, 0x1DEADBEEF};
+    a <<= 4;
+    EXPECT_TRUE(a == 0xDEADBEEF0_36);
+    a <<= 3;
+    EXPECT_TRUE(a == 0xF56DF7780_36);
+    a <<= 9;
+    EXPECT_TRUE(a == 0xDBEEF0000_36);
+}
+
+TEST(LeftShiftTest, SingleBlockTest)
+{
+    bits a{16, 0xDEAD};
+    a <<= 8;
+    EXPECT_TRUE(a == 0xAD00_16);
+}
+
+TEST(LeftShiftTest, SingleFullBlockTest)
+{
+    bits a{32, 0x12345678};
+    a <<= 8;
+    EXPECT_TRUE(a == 0x34567800_32);
+}
+
+TEST(LeftShiftTest, LargeShiftTest)
+{
+    bits a{8, 0b10010101};
+    a <<= 100000;
+    EXPECT_TRUE(a == 0b00000000_8);
 }
 
 TEST(AdditionTest, BasicTest)
