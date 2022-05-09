@@ -257,9 +257,9 @@ bits &bits::append(const bits &rhs)
     }
 
     for (std::size_t i = init, j = 0; i < new_arr_size; i++, j++) {
-        std::size_t upper_bits =
+        Block upper_bits =
             j + 1 < this->get_arr_size() ? (m_bitarr[j + 1] << offset) : 0;
-        std::size_t lower_bits = m_bitarr[j] >> (block_size - offset);
+        Block lower_bits = m_bitarr[j] >> (block_size - offset);
         new_bitarr[i] = upper_bits | lower_bits;
     }
 
