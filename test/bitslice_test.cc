@@ -207,6 +207,13 @@ TEST(ConcatTest, BasicTest)
 
     bits d = concat(a, concat(b, c));
     EXPECT_TRUE(d.to_string() == "010100110011001"s);
+
+    bits e{28, 0xEADBEEF};
+    bits f{40, 0xDDDEADBEEF};
+    bits g = {f, e};
+    EXPECT_TRUE(g(67, 64) == 0xD_4);
+    EXPECT_TRUE(g(63, 32) == 0xDDEADBEE_32);
+    EXPECT_TRUE(g(31, 0) == 0xFEADBEEF_32);
 }
 
 
