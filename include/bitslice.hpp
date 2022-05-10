@@ -49,6 +49,7 @@ private:
                        const std::function<Block(Block, Block)> &);
 
     Block get_block(uint64_t pos);
+    void trim_last_block();
 
 public:
     bits() = delete;
@@ -336,6 +337,16 @@ bits::Block bits::get_block(uint64_t pos)
     return upper_bits | lower_bits;
 }
 
+void bits::trim_last_block()
+{
+    auto p = get_num_block();
+    std::size_t arr_size = get_arr_size();
+
+    if (p.second != 0) {
+        m_bitarr[arr_size - 1] &= ((1 << p.second) - 1);
+    }
+}
+
 bits &bits::operator>>=(uint64_t val)
 {
     std::size_t cnt = 0;
@@ -366,8 +377,6 @@ bits &bits::operator<<=(uint64_t val)
     std::size_t pos = arr_size * block_size - val;
     std::size_t arr_pos = arr_size;
 
-    auto p = get_num_block();
-
     while (true) {
         if (pos >= block_size) {
             pos -= block_size;
@@ -382,10 +391,7 @@ bits &bits::operator<<=(uint64_t val)
         m_bitarr[i] = 0;
     }
 
-    /* Reset outbound bits to zero */
-    if (p.second != 0) {
-        m_bitarr[arr_size - 1] &= ((1 << p.second) - 1);
-    }
+    trim_last_block();
 
     return *this;
 }
@@ -441,19 +447,13 @@ bits &bits::operator^=(const bits &rhs)
 bits bits::operator~() const
 {
     bits b(m_len);
-    auto p = b.get_num_block();
     std::size_t arr_size = b.get_arr_size();
 
     for (std::size_t i = 0; i < arr_size; i++) {
         b.m_bitarr[i] = ~m_bitarr[i];
     }
 
-    if (p.second != 0) {
-        b.m_bitarr[arr_size - 1] =
-            (b.m_bitarr[arr_size - 1] << (block_size - p.second)) >>
-            (block_size - p.second);
-    }
-
+    b.trim_last_block();
     return b;
 }
 
