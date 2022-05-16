@@ -49,6 +49,7 @@ private:
                        const std::function<Block(Block, Block)> &);
 
     Block get_block(uint64_t pos);
+    uint64_t get_nbits(uint64_t pos, std::size_t digit = block_size);
     void trim_last_block();
 
 public:
@@ -317,6 +318,45 @@ bool bits::operator==(const bits &rhs) const
 //}
 //
 //
+
+uint64_t bits::get_nbits(uint64_t pos, std::size_t digits)
+{
+    std::size_t max_num_digits = std::numeric_limits<uint64_t>::digits;
+    if (digits > max_num_digits) {
+        throw std::invalid_argument("The digits must less than " +
+                                    std::to_string(max_num_digits) + ".");
+    }
+
+    /* Open start */
+    auto p_start = get_num_block(pos);
+
+    /* Closed end */
+    auto p_end = pos + digits > m_len ? get_num_block(pos + digits)
+                                      : get_num_block(m_len);
+
+    uint64_t res = 0;
+
+    if (p_start.first == p_end.first) {
+        res = (m_bitarr[p_start.first] >> p_start.second) &
+              ((1 << (p_end.second - p_start.second)) - 1);
+        return res;
+    }
+
+    for (std::size_t pos = p_end.first + 1; pos-- > p_start.first;) {
+        if (pos == p_start.first) {
+            res <<= (block_size - p_start.second);
+            res |= (m_bitarr[pos] >> p_start.second);
+            /* res |= (m_bitarr[pos] >> p_start.second)
+             * & (1 << (block_size - p_start.second)) - 1); */
+        } else if (pos == p_end.first) {
+            res |= m_bitarr[pos] & ((1 << p_end.second) - 1);
+        } else {
+            res <<= block_size;
+            res |= m_bitarr[pos];
+        }
+    }
+    return res;
+}
 
 bits::Block bits::get_block(uint64_t pos)
 {
