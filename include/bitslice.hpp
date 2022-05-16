@@ -331,8 +331,8 @@ uint64_t bits::get_nbits(uint64_t pos, std::size_t digits)
     auto p_start = get_num_block(pos);
 
     /* Closed end */
-    auto p_end = pos + digits > m_len ? get_num_block(pos + digits)
-                                      : get_num_block(m_len);
+    auto p_end = pos + digits <= m_len ? get_num_block(pos + digits)
+                                       : get_num_block(m_len);
 
     uint64_t res = 0;
 
