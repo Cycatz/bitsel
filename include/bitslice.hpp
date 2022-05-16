@@ -81,6 +81,8 @@ public:
 
 
     uint64_t get_nbits(uint64_t pos, std::size_t digit = block_size);
+    void set_nbits(uint64_t val, uint64_t pos, std::size_t digit = block_size);
+
     bool test(std::size_t pos) const;
     bool operator[](std::size_t pos) const;
 
@@ -358,6 +360,52 @@ uint64_t bits::get_nbits(uint64_t pos, std::size_t digits)
         }
     }
     return res;
+}
+
+void bits::set_nbits(uint64_t val, uint64_t pos, std::size_t digits)
+{
+    std::size_t max_num_digits = std::numeric_limits<uint64_t>::digits;
+    if (digits > max_num_digits) {
+        throw std::invalid_argument("The digits must less than " +
+                                    std::to_string(max_num_digits) + ".");
+    }
+
+    /* Open start */
+    auto p_start = get_num_block(pos);
+
+    /* Closed end */
+    auto p_end = pos + digits <= m_len ? get_num_block(pos + digits)
+                                       : get_num_block(m_len);
+
+    /* Ensure val is at most n-bit long */
+    val &= ((1ULL << digits) - 1);
+
+    if (p_start.first == p_end.first) {
+        Block mask = ((1 << digits) - 1) << p_start.second;
+        m_bitarr[p_start.first] &= ~mask;
+        m_bitarr[p_start.first] |= static_cast<Block>(val) << p_start.second;
+        return;
+    }
+
+    for (std::size_t pos = p_start.first; pos <= p_end.first; pos++) {
+        if (pos == p_start.first) {
+            Block mask = ((1 << (block_size - p_start.second)) - 1)
+                         << p_start.second;
+            std::size_t b = block_size - p_start.second;
+            m_bitarr[pos] &= ~mask;
+            m_bitarr[pos] |= static_cast<Block>(val & ((1 << b) - 1))
+                             << p_start.second;
+            val >>= b;
+        } else if (pos == p_end.first) {
+            Block mask = (1 << p_end.second) - 1;
+            m_bitarr[pos] &= ~mask;
+            m_bitarr[pos] |= val & mask;
+        } else {
+            /* m_bitarr[pos] = (val & (1ULL << block_size) - 1); */
+            m_bitarr[pos] = (val & static_cast<Block>(-1));
+            val >>= block_size;
+        }
+    }
 }
 
 bits::Block bits::get_block(uint64_t pos)

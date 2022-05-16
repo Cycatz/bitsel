@@ -170,6 +170,17 @@ TEST(GetNBitsTest, BasicTest)
     EXPECT_TRUE(i == 0xDBEEFDEA);
 }
 
+TEST(SetNBitsTest, BasicTest)
+{
+    bits b = 0xDEADBEEF_u(32);
+    b.set_nbits(0x1E, 0, 6);
+    EXPECT_TRUE(b == 0xDEADBEDE_u(32));
+
+    bits c = 0xDEADBEEFDEADBEEF_u(64);
+    c.set_nbits(0xFEEDBABE, 20, 32);
+    EXPECT_TRUE(c == 0xDEAFEEDBABEDBEEF_u(64));
+}
+
 
 
 TEST(RepeatTest, BasicTest)
@@ -224,9 +235,9 @@ TEST(ConcatTest, BasicTest)
     bits e{28, 0xEADBEEF};
     bits f{40, 0xDDDEADBEEF};
     bits g = {f, e};
-    EXPECT_TRUE(g(67, 64) == 0xD_4);
-    EXPECT_TRUE(g(63, 32) == 0xDDEADBEE_32);
-    EXPECT_TRUE(g(31, 0) == 0xFEADBEEF_32);
+    EXPECT_TRUE(g(67, 64) == 0xD_u(4));
+    EXPECT_TRUE(g(63, 32) == 0xDDEADBEE_u(32));
+    EXPECT_TRUE(g(31, 0) == 0xFEADBEEF_u(32));
 }
 
 
@@ -234,47 +245,47 @@ TEST(RightShiftTest, BasicTest)
 {
     bits a{64, 0xDEADBEEF12345678};
     a >>= 4;
-    EXPECT_TRUE(a == 0x0DEADBEEF1234567_64);
+    EXPECT_TRUE(a == 0x0DEADBEEF1234567_u(64));
     a >>= 1;
-    EXPECT_TRUE(a == 0x06F56DF77891A2B3_64);
+    EXPECT_TRUE(a == 0x06F56DF77891A2B3_u(64));
     a >>= 7;
-    EXPECT_TRUE(a == 0x000DEADBEEF12345_64);
+    EXPECT_TRUE(a == 0x000DEADBEEF12345_u(64));
     a >>= 20;
-    EXPECT_TRUE(a == 0x00000000DEADBEEF_64);
+    EXPECT_TRUE(a == 0x00000000DEADBEEF_u(64));
     a >>= 100000;
-    EXPECT_TRUE(a == 0_64);
+    EXPECT_TRUE(a == 0_u(64));
 }
 
 TEST(LeftShiftTest, TwoBlockTest)
 {
     bits a{36, 0x1DEADBEEF};
     a <<= 4;
-    EXPECT_TRUE(a == 0xDEADBEEF0_36);
+    EXPECT_TRUE(a == 0xDEADBEEF0_u(36));
     a <<= 3;
-    EXPECT_TRUE(a == 0xF56DF7780_36);
+    EXPECT_TRUE(a == 0xF56DF7780_u(36));
     a <<= 9;
-    EXPECT_TRUE(a == 0xDBEEF0000_36);
+    EXPECT_TRUE(a == 0xDBEEF0000_u(36));
 }
 
 TEST(LeftShiftTest, SingleBlockTest)
 {
     bits a{16, 0xDEAD};
     a <<= 8;
-    EXPECT_TRUE(a == 0xAD00_16);
+    EXPECT_TRUE(a == 0xAD00_u(16));
 }
 
 TEST(LeftShiftTest, SingleFullBlockTest)
 {
     bits a{32, 0x12345678};
     a <<= 8;
-    EXPECT_TRUE(a == 0x34567800_32);
+    EXPECT_TRUE(a == 0x34567800_u(32));
 }
 
 TEST(LeftShiftTest, LargeShiftTest)
 {
     bits a{8, 0b10010101};
     a <<= 100000;
-    EXPECT_TRUE(a == 0b00000000_8);
+    EXPECT_TRUE(a == 0b00000000_u(8));
 }
 
 TEST(AdditionTest, BasicTest)
