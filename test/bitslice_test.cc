@@ -159,12 +159,25 @@ TEST(SliceTestValid, AdvancedTest)
     EXPECT_TRUE(b2a(44, 13) == b2b);
 }
 
+TEST(GetNBitsTest, BasicTest)
+{
+    bits b = 0xDEADBEEF_u(32);
+    auto i = b.get_nbits(0, 6);
+    EXPECT_TRUE(i == 0x2f);
+
+    bits c = 0xDEADBEEFDEADBEEF_u(64);
+    i = c.get_nbits(20, 32);
+    EXPECT_TRUE(i == 0xDBEEFDEA);
+}
+
+
 
 TEST(RepeatTest, BasicTest)
 {
     bits a{"01010"};
 
     a.repeat(3);
+
     EXPECT_TRUE(a.to_string() == "010100101001010"s);
 }
 

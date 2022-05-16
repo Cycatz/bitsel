@@ -79,6 +79,8 @@ public:
     bits operator()(std::size_t s) const { return operator()(s, 0); }
     bits operator()(std::size_t, std::size_t) const;
 
+
+    uint64_t get_nbits(uint64_t pos, std::size_t digit = block_size);
     bool test(std::size_t pos) const;
     bool operator[](std::size_t pos) const;
 
