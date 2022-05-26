@@ -59,6 +59,9 @@ public:
     explicit bits(const std::string &str);
     bits(std::initializer_list<bits>);
 
+    static bits ones(std::size_t);
+    static bits zeros(std::size_t);
+
     bits(const bits &);             // copy constructor
     bits(bits &&);                  // move constructor
     bits &operator=(const bits &);  // copy assignment operator
@@ -132,6 +135,23 @@ bits::bits(std::initializer_list<bits> l) : m_len(0)
     for (auto it = std::next(l.begin()); it != l.end(); it++) {
         this->append(*it);
     }
+}
+
+bits bits::ones(std::size_t nbits)
+{
+    bits b{nbits};
+    std::fill(b.m_bitarr.get(), b.m_bitarr.get() + b.get_arr_size(), -1);
+
+    b.trim_last_block();
+    return b;
+}
+
+bits bits::zeros(std::size_t nbits)
+{
+    bits b{nbits};
+    std::fill(b.m_bitarr.get(), b.m_bitarr.get() + b.get_arr_size(), 0);
+
+    return b;
 }
 
 bits::bits(const bits &other) : m_len{other.m_len}
