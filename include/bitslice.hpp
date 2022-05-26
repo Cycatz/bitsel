@@ -48,8 +48,6 @@ private:
     bits &do_operation(const bits &,
                        const std::function<Block(Block, Block)> &);
 
-    Block get_block(uint64_t pos);
-    uint64_t get_nbits(uint64_t pos, std::size_t digit = block_size);
     void trim_last_block();
 
 public:
@@ -284,7 +282,7 @@ bits &bits::append(const bits &rhs)
 
     for (std::size_t i = init, j = block_size - offset; i < new_arr_size;
          i++, j += block_size) {
-        new_bitarr[i] = get_block(j);
+        new_bitarr[i] = get_nbits(j, block_size);
     }
 
     m_len = m_len + rhs.m_len;
@@ -428,23 +426,6 @@ void bits::set_nbits(uint64_t val, uint64_t pos, std::size_t digits)
     }
 }
 
-bits::Block bits::get_block(uint64_t pos)
-{
-    auto p = get_num_block(pos);
-
-    if (p.second == 0) {
-        return m_bitarr[p.first];
-    }
-
-    Block lower_bits = m_bitarr[p.first] >> p.second;
-    /* TODO: padded with the sign bit */
-    Block upper_bits = p.first + 1 < this->get_arr_size()
-                           ? (m_bitarr[p.first + 1] << (block_size - p.second))
-                           : 0;
-
-    return upper_bits | lower_bits;
-}
-
 void bits::trim_last_block()
 {
     auto p = get_num_block();
@@ -461,7 +442,7 @@ bits &bits::operator>>=(uint64_t val)
     std::size_t arr_size = get_arr_size();
 
     for (std::size_t pos = val; pos < m_len; pos += block_size) {
-        m_bitarr[cnt++] = get_block(pos);
+        m_bitarr[cnt++] = get_nbits(pos, block_size);
     }
     while (cnt < arr_size) {
         /* TODO: padded with the sign bit */
@@ -488,7 +469,7 @@ bits &bits::operator<<=(uint64_t val)
     while (true) {
         if (pos >= block_size) {
             pos -= block_size;
-            m_bitarr[--arr_pos] = get_block(pos);
+            m_bitarr[--arr_pos] = get_nbits(pos, block_size);
         } else {
             /* residue */
             m_bitarr[--arr_pos] = m_bitarr[0] << (block_size - pos);
