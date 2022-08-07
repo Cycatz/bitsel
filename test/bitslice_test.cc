@@ -4,6 +4,9 @@
 
 #include "bitslice.hpp"
 
+#include <array>
+#include <limits>
+
 using namespace bitslice;
 using namespace bitslice::literals;
 using namespace std::string_literals;
@@ -15,6 +18,20 @@ TEST(UIntConstructorTest, BasicTest)
 }
 
 
+TEST(BitsBitsStringConstructorTest, BasicTest)
+{
+    bitstring bs1{"0xDEADbeef"};
+    bits b1{bs1};
+    EXPECT_EQ(b1, 0xDEADBEEF_u(32));
+
+    bitstring bs2{"0o72733"};
+    bits b2{bs2};
+    EXPECT_EQ(b2, 072733_u(15));
+
+    bitstring bs3{"0b1101010101"};
+    bits b3{bs3};
+    EXPECT_EQ(b3, 0b1101010101_u(10));
+}
 
 TEST(StringConstructorTest, BasicTest)
 {
@@ -355,4 +372,153 @@ TEST(NOTTest, BasicTest)
     bits b{"10101"};
 
     EXPECT_TRUE(~a == b);
+}
+
+
+TEST(bitstringConstructor, BasicStringTest)
+{
+    bitstring bs1{"0xDeadbEef"};
+    bitstring bs2{"0b10101011"};
+    bitstring bs3{"0o73737373"};
+
+
+    EXPECT_TRUE(bs1.get_base() == num_base::hex);
+    EXPECT_TRUE(bs1.get_bitstr() == "deadbeef");
+    EXPECT_TRUE(bs1.get_width() == 32);
+
+    EXPECT_TRUE(bs2.get_base() == num_base::bin);
+    EXPECT_TRUE(bs2.get_bitstr() == "10101011");
+    EXPECT_TRUE(bs2.get_width() == 8);
+
+    EXPECT_TRUE(bs3.get_base() == num_base::oct);
+    EXPECT_TRUE(bs3.get_bitstr() == "73737373");
+    EXPECT_TRUE(bs3.get_width() == 24);
+}
+
+
+TEST(bitstringConstructor, IllegalStringTest)
+{
+    EXPECT_THROW(
+        {
+            try {
+                bitstring bs{"x123445"};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("Bit string must prefix with 0x, 0o or 0b!",
+                             e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+
+    EXPECT_THROW(
+        {
+            try {
+                bitstring bs{"0kaaaaa"};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("Bit string must prefix with 0x, 0o or 0b!",
+                             e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+
+    EXPECT_THROW(
+        {
+            try {
+                bitstring bs{"0xzzzyyy"};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("Bit string contain illegal characters!",
+                             e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+
+    EXPECT_THROW(
+        {
+            try {
+                bitstring bs{"0b3338984"};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("Bit string contain illegal characters!",
+                             e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+
+    EXPECT_THROW(
+        {
+            try {
+                bitstring bs{"0o999999"};
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("Bit string contain illegal characters!",
+                             e.what());
+                throw;
+            }
+        },
+        std::invalid_argument);
+}
+
+TEST(bitstringConstructor, HexGetNBitsTest)
+{
+    bitstring bs{"0xDEADBEEF"};
+
+    std::array<uint32_t, 7> testcases = {
+        8,  16, 17, 21, 24,  // Normal test cases
+        32, 36               // Out-of-bound test cases
+    };
+
+    for (auto nbits : testcases) {
+        uint64_t res = bs.get_nbits(0, nbits);
+        EXPECT_EQ(res, 0xDEADBEEF & ((1ULL << std::min(32U, nbits)) - 1));
+    }
+}
+
+TEST(bitstringConstructor, OctGetNBitsTest)
+{
+    bitstring bs{"0o1234567"};
+
+    std::array<uint32_t, 7> testcases = {
+        3,  11, 14, 18, 20,  // Normal test cases
+        21, 40               // Out-of-bound test cases
+    };
+
+    for (auto nbits : testcases) {
+        uint64_t res = bs.get_nbits(0, nbits);
+        EXPECT_EQ(res, 01234567 & ((1ULL << std::min(32U, nbits)) - 1));
+    }
+}
+
+TEST(bitstringConstructor, BinGetNBitsTest)
+{
+    bitstring bs{"0b11011100"};
+
+    std::array<uint32_t, 5> testcases = {
+        2, 3, 7,  // Normal test cases
+        8, 10     // Out-of-bound test cases
+    };
+
+    for (auto nbits : testcases) {
+        uint64_t res = bs.get_nbits(0, nbits);
+        EXPECT_EQ(res, 0b11011100 & ((1ULL << std::min(32U, nbits)) - 1));
+    }
+}
+
+TEST(GetNBitsTEST, BasicTest)
+{
+    using namespace bitslice::utils;
+    std::array<uint32_t, 4> arr = {0xde, 0xad, 0xbe, 0xef};
+    std::reverse(arr.begin(), arr.end());
+
+    uint32_t *arr_ptr = static_cast<uint32_t *>(arr.data());
+
+    std::array<uint32_t, 7> testcases = {
+        8,  16, 17, 21, 24,  // Normal test cases
+        32, 36               // Out-of-bound test cases
+    };
+
+    for (auto nbits : testcases) {
+        uint64_t res = get_nbits<uint32_t>(arr_ptr, 8, 32, 0, nbits);
+        EXPECT_EQ(res, 0xDEADBEEF & ((1ULL << std::min(32U, nbits)) - 1));
+    }
 }
