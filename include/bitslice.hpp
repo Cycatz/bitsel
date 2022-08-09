@@ -94,7 +94,7 @@ uint64_t get_nbits(const T *arr,
 
 std::size_t guess_width(uint64_t val)
 {
-    return val ? 1 : static_cast<std::size_t>(ceil(log2(val + 1)));
+    return val ? static_cast<std::size_t>(ceil(log2(val + 1))) : 1;
 }
 
 }  // namespace utils
