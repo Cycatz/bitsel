@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <bitset>
 #include <cctype>
+#include <cmath>    // for log2()
 #include <cstddef>  // for size_t
 #include <functional>
 #include <initializer_list>
@@ -90,6 +91,12 @@ uint64_t get_nbits(const T *arr,
     }
     return res;
 }
+
+std::size_t guess_width(uint64_t val)
+{
+    return val ? 1 : static_cast<std::size_t>(ceil(log2(val + 1)));
+}
+
 }  // namespace utils
 
 
@@ -101,6 +108,26 @@ class bitstring
 {
 public:
     bitstring() = delete;
+    bitstring(std::size_t w, const std::string &str)
+    {
+        std::string norm_str, res;
+        num_base b;
+
+        norm_str = normalize(str);
+        std::tie(b, res) = detect_base_by_prefix(norm_str);
+        if (b == num_base::unknown) {
+            throw std::invalid_argument(
+                "Bit string must prefix with 0x, 0o or 0b!");
+        }
+        if (!check_valid(res, b)) {
+            throw std::invalid_argument(
+                "Bit string contain illegal characters!");
+        }
+
+        bitstr = res;
+        base = b;
+        width = w;
+    }
     bitstring(const std::string &str)
     {
         std::string norm_str, res;
@@ -245,15 +272,28 @@ private:
 
 public:
     bits() = delete;
-    explicit bits(std::size_t);
-    explicit bits(std::size_t, uint64_t);
-    explicit bits(std::size_t, const std::string &str);
-    explicit bits(const std::string &str);
-    explicit bits(const bitstring &bs);
+
+    explicit bits(std::size_t len, uint64_t val);
+    explicit bits(std::size_t len, const bitstring &bs);
+
+    explicit bits(const bitstring &bs) : bits{bs.get_width(), bs} {}
+    explicit bits(const uint64_t val) : bits{utils::guess_width(val), val} {}
+    explicit bits(const std::string &str) : bits{bitstring{str}} {}
+    explicit bits(std::size_t len, const std::string &str)
+        : bits{len, bitstring{str}}
+    {
+    }
+
     bits(std::initializer_list<bits>);
 
-    static bits ones(std::size_t);
-    static bits zeros(std::size_t);
+    static bits zeros(std::size_t len) { return bits{len, 0}; }
+    static bits ones(std::size_t len)
+    {
+        bits b{len, 0};
+        std::fill(b.m_bitarr.get(), b.m_bitarr.get() + b.get_arr_size(), -1);
+        b.trim_last_block();
+        return b;
+    }
 
     bits(const bits &);             // copy constructor
     bits(bits &&);                  // move constructor
@@ -301,19 +341,6 @@ public:
     bits operator~() const;
 };
 
-bits::bits(std::size_t len) : m_bitarr(nullptr), m_len{len}
-{
-    if (len == 0) {
-        throw std::invalid_argument("The length must not be zero");
-    }
-
-    std::size_t arr_size = get_arr_size();
-    m_bitarr = std::make_unique<Block[]>(arr_size);
-    for (std::size_t i = 0; i < arr_size; i++) {
-        m_bitarr[i] = 0;
-    }
-}
-
 bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
 {
     if (len == 0) {
@@ -326,34 +353,13 @@ bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
         val >>= block_size;
     }
 }
-bits::bits(std::size_t len, const std::string &str)
-    : m_bitarr{nullptr}, m_len{len}
+
+bits::bits(std::size_t len, const bitstring &bs) : m_bitarr{nullptr}, m_len{len}
 {
-    // auto type = parse_string(str);
-    // if (type == /* unknown */) {
-    //     throw;
-    // }
-
-
-    std::size_t arr_size = get_arr_size();
-    std::string rev_str = str;
-    std::reverse(rev_str.begin(), rev_str.end());
-
-    m_bitarr = std::make_unique<Block[]>(arr_size);
-    for (std::size_t i = 0, j = 0; i < str.length(); i += block_size, j++) {
-        Block curblk = 0;
-        for (std::size_t k = std::min(str.length() - i, block_size); k-- > 0;) {
-            curblk = curblk << 1 | static_cast<Block>(rev_str[i + k] == '1');
-        }
-        m_bitarr[j] = curblk;
+    if (len == 0) {
+        throw std::invalid_argument("The length must not be zero");
     }
-}
 
-/*
- * Constructor with the bitstring class
- */
-bits::bits(const bitstring &bs) : m_bitarr{nullptr}, m_len{bs.get_width()}
-{
     std::size_t arr_size = get_arr_size();
     m_bitarr = std::make_unique<Block[]>(arr_size);
 
@@ -369,23 +375,6 @@ bits::bits(std::initializer_list<bits> l) : m_len(0)
     for (auto it = std::next(l.begin()); it != l.end(); it++) {
         this->append(*it);
     }
-}
-
-bits bits::ones(std::size_t nbits)
-{
-    bits b{nbits};
-    std::fill(b.m_bitarr.get(), b.m_bitarr.get() + b.get_arr_size(), -1);
-
-    b.trim_last_block();
-    return b;
-}
-
-bits bits::zeros(std::size_t nbits)
-{
-    bits b{nbits};
-    std::fill(b.m_bitarr.get(), b.m_bitarr.get() + b.get_arr_size(), 0);
-
-    return b;
 }
 
 bits::bits(const bits &other) : m_len{other.m_len}
@@ -425,27 +414,6 @@ bits &bits::operator=(bits &&rhs)
 
     return *this;
 }
-
-bits::bits(const std::string &str) : m_len{str.length()}
-{
-    if (m_len == 0) {
-        throw std::invalid_argument("The length must not be zero");
-    }
-
-    std::size_t arr_size = get_arr_size();
-    std::string rev_str = str;
-    std::reverse(rev_str.begin(), rev_str.end());
-
-    m_bitarr = std::make_unique<Block[]>(arr_size);
-    for (std::size_t i = 0, j = 0; i < str.length(); i += block_size, j++) {
-        Block curblk = 0;
-        for (std::size_t k = std::min(str.length() - i, block_size); k-- > 0;) {
-            curblk = curblk << 1 | static_cast<Block>(rev_str[i + k] == '1');
-        }
-        m_bitarr[j] = curblk;
-    }
-}
-
 
 bool bits::test(std::size_t pos) const
 {
@@ -580,7 +548,8 @@ bool bits::operator==(const bits &rhs) const
 uint64_t bits::get_nbits(std::size_t pos, std::size_t digits)
 {
     using namespace bitslice::utils;
-    return utils::get_nbits<Block>(m_bitarr.get(), block_size, m_len, pos, digits);
+    return utils::get_nbits<Block>(m_bitarr.get(), block_size, m_len, pos,
+                                   digits);
 }
 
 void bits::set_nbits(uint64_t val, std::size_t pos, std::size_t digits)
