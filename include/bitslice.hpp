@@ -789,29 +789,51 @@ namespace literals
 {
 
 /*
- *  unsigned integer
+ * Width struct, acted as an std::optional
  */
 
-auto operator"" _u(unsigned long long val)
+struct Width {
+    unsigned long long width;
+    bool empty;
+
+    Width() : width{0}, empty{true} {}
+    // cppcheck-suppress noExplicitConstructor
+    Width(unsigned long long v) : width{v}, empty{false} {}
+};
+
+auto operator"" _W(unsigned long long len)
 {
-    return [=](std::size_t len) { return bits{len, val}; };
+    return Width(len);
 }
 
-auto operator"" _s(unsigned long long val)
+auto operator"" _U(unsigned long long val)
 {
-    return [=](std::size_t len) { return bits{len, val}; };
+    return [=](Width w = Width{}) {
+        return w.empty ? bits{val} : bits{w.width, val};
+    };
 }
 
-
-auto operator"" _u(const char *str, std::size_t sz)
+auto operator"" _S(unsigned long long val)
 {
-    return [=]() { return bits{std::string{str, sz}}; };
+    return [=](Width w = Width{}) {
+        return w.empty ? bits{val} : bits{w.width, val};
+    };
 }
 
-
-auto operator"" _s(const char *str, std::size_t sz)
+auto operator"" _U(const char *str, std::size_t sz)
 {
-    return [=]() { return bits{std::string{str, sz}}; };
+    return [=](Width w = Width{}) {
+        return w.empty ? bits{std::string{str, sz}}
+                       : bits{w.width, std::string{str, sz}};
+    };
+}
+
+auto operator"" _S(const char *str, std::size_t sz)
+{
+    return [=](Width w = Width{}) {
+        return w.empty ? bits{std::string{str, sz}}
+                       : bits{w.width, std::string{str, sz}};
+    };
 }
 
 
