@@ -711,13 +711,10 @@ bits &bits::operator^=(const bits &rhs)
 
 bits bits::operator~() const
 {
-    bits b(m_len);
-    std::size_t arr_size = b.get_arr_size();
-
-    for (std::size_t i = 0; i < arr_size; i++) {
-        b.m_bitarr[i] = ~m_bitarr[i];
+    bits b(*this);
+    for (std::size_t i = 0; i < b.get_arr_size(); i++) {
+        b.m_bitarr[i] = ~b.m_bitarr[i];
     }
-
     b.trim_last_block();
     return b;
 }
