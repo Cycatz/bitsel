@@ -678,8 +678,7 @@ bits &bits::do_operation(const bits &rhs,
 {
     std::size_t old_arr_size = this->get_arr_size();
     std::size_t rhs_arr_size = rhs.get_arr_size();
-    std::size_t new_arr_size =
-        get_arr_size(std::max(old_arr_size, rhs_arr_size));
+    std::size_t new_arr_size = std::max(old_arr_size, rhs_arr_size);
 
     auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
     for (size_t i = 0; i < new_arr_size; i++) {
