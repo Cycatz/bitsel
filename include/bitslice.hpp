@@ -797,8 +797,7 @@ struct Width {
     bool empty;
 
     Width() : width{0}, empty{true} {}
-    // cppcheck-suppress noExplicitConstructor
-    Width(unsigned long long v) : width{v}, empty{false} {}
+    explicit Width(unsigned long long v) : width{v}, empty{false} {}
 };
 
 auto operator"" _W(unsigned long long len)
