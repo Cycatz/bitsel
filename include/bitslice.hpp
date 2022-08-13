@@ -475,16 +475,17 @@ bits &bits::append(const bits &rhs)
     auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
     std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
 
-
-    std::size_t offset = rhs_p.second;
-    std::size_t init = rhs.get_arr_size() - 1;
+    std::size_t ioff = rhs_p.second;
+    std::size_t iidx = rhs.get_arr_size() - 1;
+    std::size_t ipos = rhs_p.second == 0 ? 0 : block_size - ioff;
 
     /* Handle residue bits */
     if (rhs_p.second != 0) {
-        new_bitarr[init++] |= m_bitarr[0] << offset;
+        new_bitarr[iidx] |= m_bitarr[0] << ioff;
     }
+    iidx++;
 
-    for (std::size_t i = init, j = block_size - offset; i < new_arr_size;
+    for (std::size_t i = iidx, j = ipos; i < new_arr_size;
          i++, j += block_size) {
         new_bitarr[i] = get_nbits(j, block_size);
     }
