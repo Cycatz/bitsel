@@ -333,8 +333,6 @@ public:
 
     bits &operator>>=(std::size_t);
     bits &operator<<=(std::size_t);
-    bits &operator*=(uint64_t);
-    bits &operator+=(const bits &);
     bits &operator&=(const bits &);
     bits &operator|=(const bits &);
     bits &operator^=(const bits &);
@@ -662,17 +660,6 @@ bits &bits::operator<<=(std::size_t val)
     return *this;
 }
 
-
-bits &bits::operator+=(const bits &rhs)
-{
-    return this->append(rhs);
-}
-
-bits &bits::operator*=(uint64_t times)
-{
-    return this->repeat(times);
-}
-
 bits &bits::do_operation(const bits &rhs,
                          const std::function<Block(Block, Block)> &op)
 {
@@ -719,7 +706,7 @@ bits bits::operator~() const
     return b;
 }
 
-bits repl(uint64_t times, bits b)
+bits Fill(uint64_t times, bits b)
 {
     if (times == 0) {
         throw std::invalid_argument("The times must not be zero");
@@ -728,7 +715,7 @@ bits repl(uint64_t times, bits b)
 }
 
 
-bits concat(bits lhs, const bits &rhs)
+bits Cat(bits lhs, const bits &rhs)
 {
     lhs.append(rhs);
     return lhs;
@@ -746,18 +733,6 @@ bits operator<<(bits b, uint64_t val)
     return b;
 }
 
-
-bits operator+(bits lhs, const bits &rhs)
-{
-    lhs += rhs;
-    return lhs;
-}
-
-bits operator*(uint64_t times, bits b)
-{
-    b *= times;
-    return b;
-}
 
 bits operator&(bits lhs, const bits &rhs)
 {
