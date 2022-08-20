@@ -269,6 +269,7 @@ private:
                        const std::function<Block(Block, Block)> &);
 
     void trim_last_block();
+    void shrink(std::size_t len);
 
 public:
     bits() = delete;
@@ -514,8 +515,11 @@ bits bits::operator()(std::size_t s, std::size_t e) const
         throw std::out_of_range("range error");
     }
 
-    const std::string b = to_string(s, e);
-    return bits(b);
+    bits b{*this};
+    b >>= e;
+    b.shrink(s - e + 1);
+
+    return b;
 }
 
 bool bits::operator==(const bits &rhs) const
@@ -613,6 +617,24 @@ void bits::trim_last_block()
     if (p.second != 0) {
         m_bitarr[arr_size - 1] &= ((1 << p.second) - 1);
     }
+}
+
+void bits::shrink(std::size_t len)
+{
+    if (len >= m_len) {
+        throw std::invalid_argument(
+            "The new length must be less than current length");
+    }
+
+    if (len == 0) {
+        throw std::invalid_argument("The length must not be zero");
+    }
+
+    bits b{len, 0};
+    std::copy_n(m_bitarr.get(), b.get_arr_size(), b.m_bitarr.get());
+    b.trim_last_block();
+
+    *this = std::move(b);
 }
 
 bits &bits::operator>>=(std::size_t val)
