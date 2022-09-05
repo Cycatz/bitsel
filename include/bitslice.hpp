@@ -309,9 +309,17 @@ public:
     bits &repeat(uint64_t);
     bits &append(const bits &);
 
-    std::string to_string() const { return to_string(m_len - 1, 0); }
-    std::string to_string(std::size_t s) const { return to_string(s, 0); }
-    std::string to_string(std::size_t, std::size_t) const;
+    std::string to_string(std::size_t,
+                          std::size_t,
+                          num_base base = num_base::hex) const;
+    std::string to_string(num_base base = num_base::hex) const
+    {
+        return to_string(m_len - 1, 0, base);
+    }
+    std::string to_string(std::size_t s, num_base base = num_base::hex) const
+    {
+        return to_string(s, 0, base);
+    }
 
     /*
      *  Slice operations
@@ -319,7 +327,7 @@ public:
     bits operator()(std::size_t, std::size_t) const;
 
 
-    uint64_t get_nbits(std::size_t pos, std::size_t digit = block_size);
+    uint64_t get_nbits(std::size_t pos, std::size_t digit = block_size) const;
     void set_nbits(uint64_t val,
                    std::size_t pos,
                    std::size_t digit = block_size);
@@ -493,18 +501,23 @@ bits &bits::append(const bits &rhs)
     return *this;
 }
 
-std::string bits::to_string(std::size_t s, std::size_t e) const
+std::string bits::to_string(std::size_t s, std::size_t e, num_base base) const
 {
     if (!check_range(s, e)) {
-        return "";
+        throw std::out_of_range("range error");
     }
 
     std::string bitstr;
     bitstr.reserve(s - e + 1);
 
-    for (size_t i = s + 1; i-- > e;) {
-        bitstr.append(1, operator[](i) ? '1' : '0');
+    std::size_t step = static_cast<std::size_t>(base);
+
+    for (size_t i = e; i <= s; i += step) {
+        std::size_t nbits = i + step - 1 > s ? s - i + 1 : step;
+        std::size_t val = get_nbits(i, nbits);
+        bitstr.push_back(val >= 10 ? 'A' + val - 10 : '0' + val);
     }
+    std::reverse(bitstr.begin(), bitstr.end());
     return bitstr;
 }
 
@@ -547,7 +560,7 @@ bool bits::operator==(const bits &rhs) const
 //
 //
 
-uint64_t bits::get_nbits(std::size_t pos, std::size_t digits)
+uint64_t bits::get_nbits(std::size_t pos, std::size_t digits) const
 {
     using namespace bitslice::utils;
     return utils::get_nbits<Block>(m_bitarr.get(), block_size, m_len, pos,

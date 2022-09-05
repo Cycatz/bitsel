@@ -168,21 +168,45 @@ TEST(InitializerListConstructorTest, AdvancedTest)
 TEST(ToStringTestValid, ZeroArgument)
 {
     bits b1{"0b01000101010101000001001010101010010101001010"};
-    EXPECT_TRUE(b1.to_string() ==
-                "01000101010101000001001010101010010101001010"s);
+    EXPECT_EQ(b1.to_string(num_base::bin),
+              "01000101010101000001001010101010010101001010");
+
+    bits b2{"0xDEADBEEFBABAAABBABFABA"};
+    EXPECT_EQ(b2.to_string(num_base::hex), "DEADBEEFBABAAABBABFABA");
+
+    bits b3{"0o71272561712462471271712460124"};
+    EXPECT_EQ(b3.to_string(num_base::oct), "71272561712462471271712460124");
 }
 TEST(ToStringTestValid, OneArgument)
 {
     bits b1{"0b01000101010101000001001010101010010101001010"};
-    EXPECT_TRUE(b1.to_string(1) == "10");
-    EXPECT_TRUE(b1.to_string(4) == "01010");
-    EXPECT_TRUE(b1.to_string(40) ==
-                "00101010101000001001010101010010101001010");
+    EXPECT_EQ(b1.to_string(1, num_base::bin), "10");
+    EXPECT_EQ(b1.to_string(3, num_base::hex), "A");
+    EXPECT_EQ(b1.to_string(4, num_base::bin), "01010");
+    EXPECT_EQ(b1.to_string(7, num_base::hex), "4A");
+    EXPECT_EQ(b1.to_string(40, num_base::bin),
+              "00101010101000001001010101010010101001010");
+
+
+    bits b2{"0xDEADBEEFBABAAABBABFABA"};
+    EXPECT_EQ(b2.to_string(0, num_base::hex), "0");
+    EXPECT_EQ(b2.to_string(1, num_base::hex), "2");
+    EXPECT_EQ(b2.to_string(1, num_base::bin), "10");
+    EXPECT_EQ(b2.to_string(15, num_base::hex), "FABA");
+    EXPECT_EQ(b2.to_string(15, num_base::oct), "175272");
+    EXPECT_EQ(b2.to_string(16, num_base::hex), "1FABA");
+    EXPECT_EQ(b2.to_string(79, num_base::hex), "ADBEEFBABAAABBABFABA");
 }
 TEST(ToStringTestValid, TwoArgument)
 {
-    // Bits b3{6};
-    // EXPECT_TRUE(b3.to_string(3, 2) == "00"s);
+    bits b1{"0b01000101010101000001001010101010010101001010"};
+    EXPECT_EQ(b1.to_string(0, 0, num_base::bin), "0");
+    EXPECT_EQ(b1.to_string(4, 1, num_base::hex), "5");
+    EXPECT_EQ(b1.to_string(4, 1, num_base::bin), "0101");
+    EXPECT_EQ(b1.to_string(7, 3, num_base::hex), "09");
+    EXPECT_EQ(b1.to_string(16, 9, num_base::hex), "52");
+    EXPECT_EQ(b1.to_string(20, 15, num_base::oct), "25");
+    EXPECT_EQ(b1.to_string(40, 22, num_base::bin), "0010101010100000100");
 }
 
 
