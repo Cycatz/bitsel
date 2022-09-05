@@ -318,39 +318,71 @@ TEST(CatTest, BasicTest)
 TEST(RightShiftTest, BasicTest)
 {
     bits a{64, 0xDEADBEEF12345678};
+    bits b = bits::zeros(64);
+
+    b = a >> 4;
     a >>= 4;
     EXPECT_TRUE(a == 0x0DEADBEEF1234567_U(64_W));
+    EXPECT_TRUE(b == 0x0DEADBEEF1234567_U(64_W));
+
+    b = a >> 1;
     a >>= 1;
     EXPECT_TRUE(a == 0x06F56DF77891A2B3_U(64_W));
+    EXPECT_TRUE(b == 0x06F56DF77891A2B3_U(64_W));
+
+    b = a >> 7;
     a >>= 7;
     EXPECT_TRUE(a == 0x000DEADBEEF12345_U(64_W));
+    EXPECT_TRUE(b == 0x000DEADBEEF12345_U(64_W));
+
+    b = a >> 20;
     a >>= 20;
     EXPECT_TRUE(a == 0x00000000DEADBEEF_U(64_W));
+    EXPECT_TRUE(b == 0x00000000DEADBEEF_U(64_W));
+
+    b = a >> 100000;
     a >>= 100000;
     EXPECT_TRUE(a == 0_U(64_W));
+    EXPECT_TRUE(b == 0_U(64_W));
 }
 
 TEST(LeftShiftTest, TwoBlockTest)
 {
     bits a{36, 0x1DEADBEEF};
+    bits b = bits::zeros(36);
+    b = a << 4;
     a <<= 4;
     EXPECT_TRUE(a == 0xDEADBEEF0_U(36_W));
+    EXPECT_TRUE(b == 0xDEADBEEF0_U(36_W));
+
+    b = a << 3;
     a <<= 3;
     EXPECT_TRUE(a == 0xF56DF7780_U(36_W));
+    EXPECT_TRUE(b == 0xF56DF7780_U(36_W));
+
+    b = a << 9;
     a <<= 9;
     EXPECT_TRUE(a == 0xDBEEF0000_U(36_W));
+    EXPECT_TRUE(b == 0xDBEEF0000_U(36_W));
 }
 
 TEST(LeftShiftTest, SingleBlockTest)
 {
     bits a{16, 0xDEAD};
+    bits b = bits::zeros(16);
+
+    b = a << 8;
     a <<= 8;
     EXPECT_TRUE(a == 0xAD00_U(16_W));
+    EXPECT_TRUE(b == 0xAD00_U(16_W));
 }
 
 TEST(LeftShiftTest, SingleFullBlockTest)
 {
     bits a{32, 0x12345678};
+    bits b = bits::zeros(32);
+
+    b = a << 8;
     a <<= 8;
     EXPECT_TRUE(a == 0x34567800_U(32_W));
 }
@@ -358,8 +390,12 @@ TEST(LeftShiftTest, SingleFullBlockTest)
 TEST(LeftShiftTest, LargeShiftTest)
 {
     bits a{8, 0b10010101};
+    bits b = bits::zeros(8);
+
+    b = a << 100000;
     a <<= 100000;
     EXPECT_TRUE(a == 0b00000000_U(8_W));
+    EXPECT_TRUE(b == 0b00000000_U(8_W));
 }
 
 
