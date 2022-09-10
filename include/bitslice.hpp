@@ -310,6 +310,7 @@ public:
     bits &append(const bits &);
 
     std::string to_string(num_base base = num_base::hex) const;
+    uint64_t to_uint64() const { return get_nbits(0, 64); }
 
     /*
      *  Slice operations

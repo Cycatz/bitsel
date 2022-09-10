@@ -581,3 +581,12 @@ TEST(GetNBitsTEST, BasicTest)
         EXPECT_EQ(res, 0xDEADBEEF & ((1ULL << std::min(32U, nbits)) - 1));
     }
 }
+
+TEST(ToUInt64Test, BasicTest)
+{
+    using namespace bitslice::utils;
+    bits b = 0xDEADBEEF_U(32_W);
+    uint32_t val = b.to_uint64();
+
+    EXPECT_EQ(val, 0xDEADBEEF);
+}
