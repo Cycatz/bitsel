@@ -309,17 +309,7 @@ public:
     bits &repeat(uint64_t);
     bits &append(const bits &);
 
-    std::string to_string(std::size_t,
-                          std::size_t,
-                          num_base base = num_base::hex) const;
-    std::string to_string(num_base base = num_base::hex) const
-    {
-        return to_string(m_len - 1, 0, base);
-    }
-    std::string to_string(std::size_t s, num_base base = num_base::hex) const
-    {
-        return to_string(s, 0, base);
-    }
+    std::string to_string(num_base base = num_base::hex) const;
 
     /*
      *  Slice operations
@@ -501,19 +491,15 @@ bits &bits::append(const bits &rhs)
     return *this;
 }
 
-std::string bits::to_string(std::size_t s, std::size_t e, num_base base) const
+std::string bits::to_string(num_base base) const
 {
-    if (!check_range(s, e)) {
-        throw std::out_of_range("range error");
-    }
-
     std::string bitstr;
-    bitstr.reserve(s - e + 1);
+    bitstr.reserve(m_len);
 
     std::size_t step = static_cast<std::size_t>(base);
 
-    for (size_t i = e; i <= s; i += step) {
-        std::size_t nbits = i + step - 1 > s ? s - i + 1 : step;
+    for (size_t i = 0; i < m_len; i += step) {
+        std::size_t nbits = i + step - 1 >= m_len ? m_len - i : step;
         std::size_t val = get_nbits(i, nbits);
         bitstr.push_back(val >= 10 ? 'A' + val - 10 : '0' + val);
     }
