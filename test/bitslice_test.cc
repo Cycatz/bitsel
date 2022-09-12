@@ -33,22 +33,22 @@ TEST(UIntConstructorTest, AdvancedTest)
 
 TEST(BitsBitsStringConstructorTest, BasicTest)
 {
-    bitstring bs1{"0xDEADbeef"};
+    bits::bitstring bs1{"0xDEADbeef"};
     bits b1{bs1};
     EXPECT_EQ(b1, "0xDEADBEEF"_U(32_W));
 
-    bitstring bs2{"0o72733"};
+    bits::bitstring bs2{"0o72733"};
     bits b2{20, bs2};
     EXPECT_EQ(b2, "0o72733"_U(20_W));
 
-    bitstring bs3{"0b1101010101"};
+    bits::bitstring bs3{"0b1101010101"};
     bits b3{30, bs3};
     EXPECT_EQ(b3, "0b1101010101"_U(30_W));
 }
 
 TEST(BitsBitsStringConstructorTest, AdvancedTest)
 {
-    bitstring bs1{"0xDEADbeef"};
+    bits::bitstring bs1{"0xDEADbeef"};
     bits b1{10, bs1};
     EXPECT_EQ(b1, "0b1011101111"_U(10_W));
 }
@@ -436,9 +436,9 @@ TEST(NOTTest, BasicTest)
 
 TEST(bitstringConstructor, BasicStringTest)
 {
-    bitstring bs1{"0xDeadbEef"};
-    bitstring bs2{"0b10101011"};
-    bitstring bs3{"0o73737373"};
+    bits::bitstring bs1{"0xDeadbEef"};
+    bits::bitstring bs2{"0b10101011"};
+    bits::bitstring bs3{"0o73737373"};
 
 
     EXPECT_TRUE(bs1.get_base() == num_base::hex);
@@ -460,7 +460,7 @@ TEST(bitstringConstructor, IllegalStringTest)
     EXPECT_THROW(
         {
             try {
-                bitstring bs{"x123445"};
+                bits::bitstring bs{"x123445"};
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("Bit string must prefix with 0x, 0o or 0b!",
                              e.what());
@@ -472,7 +472,7 @@ TEST(bitstringConstructor, IllegalStringTest)
     EXPECT_THROW(
         {
             try {
-                bitstring bs{"0kaaaaa"};
+                bits::bitstring bs{"0kaaaaa"};
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("Bit string must prefix with 0x, 0o or 0b!",
                              e.what());
@@ -484,7 +484,7 @@ TEST(bitstringConstructor, IllegalStringTest)
     EXPECT_THROW(
         {
             try {
-                bitstring bs{"0xzzzyyy"};
+                bits::bitstring bs{"0xzzzyyy"};
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("Bit string contain illegal characters!",
                              e.what());
@@ -496,7 +496,7 @@ TEST(bitstringConstructor, IllegalStringTest)
     EXPECT_THROW(
         {
             try {
-                bitstring bs{"0b3338984"};
+                bits::bitstring bs{"0b3338984"};
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("Bit string contain illegal characters!",
                              e.what());
@@ -508,7 +508,7 @@ TEST(bitstringConstructor, IllegalStringTest)
     EXPECT_THROW(
         {
             try {
-                bitstring bs{"0o999999"};
+                bits::bitstring bs{"0o999999"};
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("Bit string contain illegal characters!",
                              e.what());
@@ -520,7 +520,7 @@ TEST(bitstringConstructor, IllegalStringTest)
 
 TEST(bitstringConstructor, HexGetNBitsTest)
 {
-    bitstring bs{"0xDEADBEEF"};
+    bits::bitstring bs{"0xDEADBEEF"};
 
     std::array<uint32_t, 7> testcases = {
         8,  16, 17, 21, 24,  // Normal test cases
@@ -535,7 +535,7 @@ TEST(bitstringConstructor, HexGetNBitsTest)
 
 TEST(bitstringConstructor, OctGetNBitsTest)
 {
-    bitstring bs{"0o1234567"};
+    bits::bitstring bs{"0o1234567"};
 
     std::array<uint32_t, 7> testcases = {
         3,  11, 14, 18, 20,  // Normal test cases
@@ -550,7 +550,7 @@ TEST(bitstringConstructor, OctGetNBitsTest)
 
 TEST(bitstringConstructor, BinGetNBitsTest)
 {
-    bitstring bs{"0b11011100"};
+    bits::bitstring bs{"0b11011100"};
 
     std::array<uint32_t, 5> testcases = {
         2, 3, 7,  // Normal test cases
