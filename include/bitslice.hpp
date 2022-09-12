@@ -100,138 +100,6 @@ std::size_t guess_width(uint64_t val)
 }  // namespace utils
 
 
-/*
- * Perform string to bits class conversion
- */
-
-class bitstring
-{
-public:
-    bitstring() = delete;
-    bitstring(std::size_t w, const std::string &str)
-    {
-        std::string norm_str, res;
-        num_base b;
-
-        norm_str = normalize(str);
-        std::tie(b, res) = detect_base_by_prefix(norm_str);
-        if (b == num_base::unknown) {
-            throw std::invalid_argument(
-                "Bit string must prefix with 0x, 0o or 0b!");
-        }
-        if (!check_valid(res, b)) {
-            throw std::invalid_argument(
-                "Bit string contain illegal characters!");
-        }
-
-        bitstr = res;
-        base = b;
-        width = w;
-    }
-    bitstring(const std::string &str)
-    {
-        std::string norm_str, res;
-        num_base b;
-
-        norm_str = normalize(str);
-        std::tie(b, res) = detect_base_by_prefix(norm_str);
-        if (b == num_base::unknown) {
-            throw std::invalid_argument(
-                "Bit string must prefix with 0x, 0o or 0b!");
-        }
-        if (!check_valid(res, b)) {
-            throw std::invalid_argument(
-                "Bit string contain illegal characters!");
-        }
-
-        bitstr = res;
-        base = b;
-        width = guess_width(bitstr, base);
-    }
-    num_base get_base() const { return base; }
-    std::string get_bitstr() const { return bitstr; }
-    std::size_t get_width() const { return width; }
-
-    uint64_t get_nbits(std::size_t pos, std::size_t len) const
-    {
-        using namespace bitslice::utils;
-
-        std::vector<uint32_t> v;
-        v.reserve(width);
-
-        for (std::size_t i = 0; i < bitstr.length(); i++) {
-            const char c = bitstr[bitstr.length() - i - 1];
-            const uint32_t val = c >= 'a' ? c - 'a' + 10 : c - '0';
-            v.push_back(val);
-        }
-
-        std::size_t digits = static_cast<std::size_t>(base);
-        return utils::get_nbits<uint32_t>(v.data(), digits, width, pos, len);
-    }
-
-private:
-    std::string bitstr;
-    num_base base;
-    std::size_t width;
-
-    std::pair<num_base, std::string> detect_base_by_prefix(
-        const std::string &str)
-    {
-        /*
-         *  Must prefix with "0x" (avoid ambiguous meaning like "b0010")
-         *  0xdeadbeef -> deadbeef
-         *  0b00000    -> 00000
-         *  0o1122     -> 1122
-         *  010101     -> error
-         *  xAAAA      -> error
-         */
-
-        if (str.length() < 2 || str[0] != '0')
-            return std::make_pair(num_base::unknown, std::string{});
-
-        std::string str_wo_prefix = str.substr(2, str.length() - 2);
-        return std::make_pair(str[1] == 'x'   ? num_base::hex
-                              : str[1] == 'o' ? num_base::oct
-                              : str[1] == 'b' ? num_base::bin
-                                              : num_base::unknown,
-                              str_wo_prefix);
-    }
-
-    bool check_valid(const std::string &str, num_base base)
-    {
-        return std::all_of(str.begin(), str.end(), [&](char c) {
-            return base == num_base::hex
-                       ? (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
-                   : base == num_base::bin ? c == '0' || c == '1'
-                   : base == num_base::oct ? c >= '0' && c <= '7'
-                                           : false;
-        });
-    }
-    std::string normalize(const std::string &str)
-    {
-        /*
-         * Examples:
-         *   - 0xABCD        -> 0xabcd
-         *   - 0b0101010101  -> 0babcd
-         *   - 0XdEaDBeeF    -> 0xdeadbeef
-         *   - 01011         -> 01011
-         *   - 239084828478  -> 239084828478
-         */
-
-        std::string new_str;
-        std::transform(str.begin(), str.end(), std::back_inserter(new_str),
-                       [](unsigned char c) {
-                           return std::isalpha(c) ? std::tolower(c) : c;
-                       });
-        return new_str;
-    }
-    std::size_t guess_width(const std::string &bs, num_base base)
-    {
-        /* We determine the width simply by calculating len * bits-per-digit */
-        return bs.length() * static_cast<std::size_t>(base);
-    }
-};
-
 class bits
 {
 private:
@@ -272,6 +140,30 @@ private:
     void shrink(std::size_t len);
 
 public:
+    class bitstring
+    {
+    public:
+        bitstring() = delete;
+        bitstring(std::size_t w, const std::string &str);
+        bitstring(const std::string &str);
+
+        num_base get_base() const { return base; }
+        std::string get_bitstr() const { return bitstr; }
+        std::size_t get_width() const { return width; }
+        uint64_t get_nbits(std::size_t pos, std::size_t len) const;
+
+    private:
+        std::string bitstr;
+        num_base base;
+        std::size_t width;
+
+        std::pair<num_base, std::string> detect_base_by_prefix(
+            const std::string &str);
+        bool check_valid(const std::string &str, num_base base);
+        std::string normalize(const std::string &str);
+        std::size_t guess_width(const std::string &bs, num_base base);
+    };
+
     bits() = delete;
 
     explicit bits(std::size_t len, uint64_t val);
@@ -337,6 +229,122 @@ public:
     bits &operator^=(const bits &);
     bits operator~() const;
 };
+
+
+
+bits::bitstring::bitstring(std::size_t w, const std::string &str)
+{
+    std::string norm_str, res;
+    num_base b;
+
+    norm_str = normalize(str);
+    std::tie(b, res) = detect_base_by_prefix(norm_str);
+    if (b == num_base::unknown) {
+        throw std::invalid_argument(
+            "Bit string must prefix with 0x, 0o or 0b!");
+    }
+    if (!check_valid(res, b)) {
+        throw std::invalid_argument("Bit string contain illegal characters!");
+    }
+
+    bitstr = res;
+    base = b;
+    width = w;
+}
+
+bits::bitstring::bitstring(const std::string &str)
+{
+    std::string norm_str, res;
+    num_base b;
+
+    norm_str = normalize(str);
+    std::tie(b, res) = detect_base_by_prefix(norm_str);
+    if (b == num_base::unknown) {
+        throw std::invalid_argument(
+            "Bit string must prefix with 0x, 0o or 0b!");
+    }
+    if (!check_valid(res, b)) {
+        throw std::invalid_argument("Bit string contain illegal characters!");
+    }
+
+    bitstr = res;
+    base = b;
+    width = guess_width(bitstr, base);
+}
+
+uint64_t bits::bitstring::get_nbits(std::size_t pos, std::size_t len) const
+{
+    using namespace bitslice::utils;
+
+    std::vector<uint32_t> v;
+    v.reserve(width);
+
+    for (std::size_t i = 0; i < bitstr.length(); i++) {
+        const char c = bitstr[bitstr.length() - i - 1];
+        const uint32_t val = c >= 'a' ? c - 'a' + 10 : c - '0';
+        v.push_back(val);
+    }
+
+    std::size_t digits = static_cast<std::size_t>(base);
+    return utils::get_nbits<uint32_t>(v.data(), digits, width, pos, len);
+}
+
+std::pair<num_base, std::string> bits::bitstring::detect_base_by_prefix(
+    const std::string &str)
+{
+    /*
+     *  Must prefix with "0x" (avoid ambiguous meaning like "b0010")
+     *  0xdeadbeef -> deadbeef
+     *  0b00000    -> 00000
+     *  0o1122     -> 1122
+     *  010101     -> error
+     *  xAAAA      -> error
+     */
+
+    if (str.length() < 2 || str[0] != '0')
+        return std::make_pair(num_base::unknown, std::string{});
+
+    std::string str_wo_prefix = str.substr(2, str.length() - 2);
+    return std::make_pair(str[1] == 'x'   ? num_base::hex
+                          : str[1] == 'o' ? num_base::oct
+                          : str[1] == 'b' ? num_base::bin
+                                          : num_base::unknown,
+                          str_wo_prefix);
+}
+
+bool bits::bitstring::check_valid(const std::string &str, num_base base)
+{
+    return std::all_of(str.begin(), str.end(), [&](char c) {
+        return base == num_base::hex
+                   ? (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
+               : base == num_base::bin ? c == '0' || c == '1'
+               : base == num_base::oct ? c >= '0' && c <= '7'
+                                       : false;
+    });
+}
+std::string bits::bitstring::normalize(const std::string &str)
+{
+    /*
+     * Examples:
+     *   - 0xABCD        -> 0xabcd
+     *   - 0b0101010101  -> 0babcd
+     *   - 0XdEaDBeeF    -> 0xdeadbeef
+     *   - 01011         -> 01011
+     *   - 239084828478  -> 239084828478
+     */
+
+    std::string new_str;
+    std::transform(
+        str.begin(), str.end(), std::back_inserter(new_str),
+        [](unsigned char c) { return std::isalpha(c) ? std::tolower(c) : c; });
+    return new_str;
+}
+
+std::size_t bits::bitstring::guess_width(const std::string &bs, num_base base)
+{
+    /* We determine the width simply by calculating len * bits-per-digit */
+    return bs.length() * static_cast<std::size_t>(base);
+}
 
 bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
 {
