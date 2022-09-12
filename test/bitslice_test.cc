@@ -425,6 +425,36 @@ TEST(XORTest, BasicTest)
     EXPECT_EQ(d, "0x7500045189E"_U(44_W));
 }
 
+TEST(PlusTest, BasicTest)
+{
+    /* TODO: Need more robust tests */
+
+    bits a{"0xDEADBEEF224"};
+    bits b{"0xABADBABE828"};
+    bits c{"0o1222"};
+
+    a += b;
+    EXPECT_EQ(a, "0x8A5B79ADA4C"_U(44_W));
+
+    bits d = a + c;
+    EXPECT_EQ(d, "0x8A5B79ADCDE"_U(44_W));
+}
+
+TEST(SubtractTest, BasicTest)
+{
+    /* TODO: Need more robust tests */
+
+    bits a{"0xDEADBEEF224"};
+    bits b{"0xABADBABE828"};
+    bits c{"0o1222"};
+
+    a -= b;
+    EXPECT_EQ(a, "0x330004309FC"_U(44_W));
+
+    a -= b;
+    EXPECT_EQ(a, "0x875249721d4"_U(44_W));
+}
+
 TEST(NOTTest, BasicTest)
 {
     bits a{"0xDEADBEEF1234567890"};

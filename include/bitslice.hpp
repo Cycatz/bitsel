@@ -134,6 +134,7 @@ private:
     }
 
     bits &do_operation(const bits &,
+                       const std::function<Block(Block, Block)> &,
                        const std::function<Block(Block, Block)> &);
 
     void trim_last_block();
@@ -227,6 +228,8 @@ public:
     bits &operator&=(const bits &);
     bits &operator|=(const bits &);
     bits &operator^=(const bits &);
+    bits &operator+=(const bits &);
+    bits &operator-=(const bits &);
     bits operator~() const;
 };
 
@@ -689,67 +692,6 @@ bits &bits::operator<<=(std::size_t val)
     return *this;
 }
 
-bits &bits::do_operation(const bits &rhs,
-                         const std::function<Block(Block, Block)> &op)
-{
-    std::size_t old_arr_size = this->get_arr_size();
-    std::size_t rhs_arr_size = rhs.get_arr_size();
-    std::size_t new_arr_size = std::max(old_arr_size, rhs_arr_size);
-
-    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
-    for (size_t i = 0; i < new_arr_size; i++) {
-        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
-        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
-
-        new_bitarr[i] = op(x, y);
-    }
-
-    m_bitarr = std::move(new_bitarr);
-    m_len = std::max(m_len, rhs.m_len);
-
-    return (*this);
-}
-
-bits &bits::operator&=(const bits &rhs)
-{
-    return do_operation(rhs, [](Block x, Block y) { return x & y; });
-}
-
-bits &bits::operator|=(const bits &rhs)
-{
-    return do_operation(rhs, [](Block x, Block y) { return x | y; });
-}
-
-bits &bits::operator^=(const bits &rhs)
-{
-    return do_operation(rhs, [](Block x, Block y) { return x ^ y; });
-}
-
-bits bits::operator~() const
-{
-    bits b(*this);
-    for (std::size_t i = 0; i < b.get_arr_size(); i++) {
-        b.m_bitarr[i] = ~b.m_bitarr[i];
-    }
-    b.trim_last_block();
-    return b;
-}
-
-bits Fill(uint64_t times, bits b)
-{
-    if (times == 0) {
-        throw std::invalid_argument("The times must not be zero");
-    }
-    return b.repeat(times);
-}
-
-
-bits Cat(bits lhs, const bits &rhs)
-{
-    lhs.append(rhs);
-    return lhs;
-}
-
 bits operator>>(bits b, uint64_t val)
 {
     b >>= val;
@@ -778,12 +720,108 @@ bits operator^(bits lhs, const bits &rhs)
     lhs ^= rhs;
     return lhs;
 }
+bits operator+(bits lhs, const bits &rhs)
+{
+    lhs += rhs;
+    return lhs;
+}
+
+bits operator-(bits lhs, const bits &rhs)
+{
+    lhs -= rhs;
+    return lhs;
+}
 
 std::ostream &operator<<(std::ostream &os, const bits &b)
 {
     os << b.to_string();
     return os;
 }
+
+bits &bits::do_operation(
+    const bits &rhs,
+    const std::function<Block(Block, Block)> &op,
+    const std::function<Block(Block, Block)> &carry = [](Block x, Block y) {
+        (void) x;
+        (void) y;
+        return 0;
+    })
+{
+    std::size_t old_arr_size = this->get_arr_size();
+    std::size_t rhs_arr_size = rhs.get_arr_size();
+    std::size_t new_arr_size = std::max(old_arr_size, rhs_arr_size);
+
+    auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
+    Block car_val = 0;
+
+    for (size_t i = 0; i < new_arr_size; i++) {
+        Block x = i >= old_arr_size ? 0 : m_bitarr[i];
+        Block y = i >= rhs_arr_size ? 0 : rhs.m_bitarr[i];
+
+        new_bitarr[i] = op(x, y) + car_val;
+        car_val = carry(x, y);
+    }
+
+    m_bitarr = std::move(new_bitarr);
+    m_len = std::max(m_len, rhs.m_len);
+
+    trim_last_block();
+    return (*this);
+}
+
+bits &bits::operator&=(const bits &rhs)
+{
+    return do_operation(rhs, [](Block x, Block y) { return x & y; });
+}
+
+bits &bits::operator|=(const bits &rhs)
+{
+    return do_operation(rhs, [](Block x, Block y) { return x | y; });
+}
+
+bits &bits::operator^=(const bits &rhs)
+{
+    return do_operation(rhs, [](Block x, Block y) { return x ^ y; });
+}
+
+bits &bits::operator+=(const bits &rhs)
+{
+    return do_operation(
+        rhs, [](Block x, Block y) { return x + y; },
+        [](Block x, Block y) { return x + y <= x && x + y <= y; });
+}
+
+bits &bits::operator-=(const bits &rhs)
+{
+    (*this) += ~rhs + bits::ones(1);
+    return *this;
+}
+
+bits bits::operator~() const
+{
+    bits b(*this);
+    for (std::size_t i = 0; i < b.get_arr_size(); i++) {
+        b.m_bitarr[i] = ~b.m_bitarr[i];
+    }
+    b.trim_last_block();
+    return b;
+}
+
+bits Fill(uint64_t times, bits b)
+{
+    if (times == 0) {
+        throw std::invalid_argument("The times must not be zero");
+    }
+    return b.repeat(times);
+}
+
+
+bits Cat(bits lhs, const bits &rhs)
+{
+    lhs.append(rhs);
+    return lhs;
+}
+
 
 
 namespace literals
