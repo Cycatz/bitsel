@@ -304,8 +304,16 @@ TEST(CatTest, BasicTest)
 
 TEST(RightShiftTest, BasicTest)
 {
+
+    /* TODO: Need more robust tests */
+
     bits a{64, 0xDEADBEEF12345678};
     bits b = bits::zeros(64);
+
+    b = a >> 0;
+    a >>= 0;
+    EXPECT_TRUE(a == 0xDEADBEEF12345678_U(64_W));
+    EXPECT_TRUE(b == 0xDEADBEEF12345678_U(64_W));
 
     b = a >> 4;
     a >>= 4;
@@ -335,8 +343,17 @@ TEST(RightShiftTest, BasicTest)
 
 TEST(LeftShiftTest, TwoBlockTest)
 {
+
+    /* TODO: Need more robust tests */
+
     bits a{36, 0x1DEADBEEF};
     bits b = bits::zeros(36);
+
+    b = a << 0;
+    a <<= 0;
+    EXPECT_TRUE(a == 0x1DEADBEEF_U(36_W));
+    EXPECT_TRUE(b == 0x1DEADBEEF_U(36_W));
+
     b = a << 4;
     a <<= 4;
     EXPECT_TRUE(a == 0xDEADBEEF0_U(36_W));

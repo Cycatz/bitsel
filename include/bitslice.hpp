@@ -669,6 +669,10 @@ bits &bits::operator<<=(std::size_t val)
         return *this;
     }
 
+    if (val == 0) {
+        return *this;
+    }
+
     std::size_t arr_size = get_arr_size();
     std::size_t pos = arr_size * block_size - val;
     std::size_t arr_pos = arr_size;
