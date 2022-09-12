@@ -196,7 +196,7 @@ public:
 
     ~bits() = default;  // destructor
 
-    void reverse();
+    bits reverse();
     constexpr std::size_t get_size() const { return m_len; }
 
     bits &repeat(uint64_t);
@@ -454,11 +454,15 @@ void bits::set(std::size_t pos, bool val) const
 }
 
 
-// void Bits::reverse()
-//{
-//     std::reverse(m_bitstr.begin(), m_bitstr.end());
-// }
-//
+bits bits::reverse()
+{
+    // Pretty dirty
+    std::string binstr = to_string(num_base::bin);
+    std::reverse(binstr.begin(), binstr.end());
+
+    return bits{m_len, "0b" + binstr};
+}
+
 
 bits &bits::repeat(uint64_t times)
 {

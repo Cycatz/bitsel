@@ -247,6 +247,19 @@ TEST(SetNBitsTest, BasicTest)
 }
 
 
+TEST(ReverseTest, BasicTest)
+{
+    bits a{"0b01011"};
+    bits b = a.reverse();
+
+    EXPECT_EQ(b, "0b11010"_U());
+
+
+    bits c{"0xAABBCCDDEEFF"};
+    bits d = c.reverse();
+
+    EXPECT_EQ(d, "0xFF77BB33DD55"_U());
+}
 
 TEST(RepeatTest, BasicTest)
 {
@@ -304,7 +317,6 @@ TEST(CatTest, BasicTest)
 
 TEST(RightShiftTest, BasicTest)
 {
-
     /* TODO: Need more robust tests */
 
     bits a{64, 0xDEADBEEF12345678};
@@ -343,7 +355,6 @@ TEST(RightShiftTest, BasicTest)
 
 TEST(LeftShiftTest, TwoBlockTest)
 {
-
     /* TODO: Need more robust tests */
 
     bits a{36, 0x1DEADBEEF};
