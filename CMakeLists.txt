@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Bitslice
+project(Bitsel
     VERSION 0.1.0
     LANGUAGES CXX
     )
@@ -16,19 +16,19 @@ if(DEBUG_SYMBOL)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif()
 
-set(BITSLICE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${BITSLICE_INCLUDE_DIR})
+set(BITSEL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${BITSEL_INCLUDE_DIR})
 
-set(BITSLICE_HEADERS include/bitslice.hpp)
-set(BITSLICE_SOURCES src/bitslice.cc)
-add_library(bitslice SHARED ${BITSLICE_SOURCES})
+set(BITSEL_HEADERS include/bitsel.hpp)
+set(BITSEL_SOURCES src/bitsel.cc)
+add_library(bitsel SHARED ${BITSEL_SOURCES})
 
-set(BITSLICE_TEST_SOURCES test/bitslice_test.cc)
-file(GLOB BITSLICE_EXAMPLE_SOURCES example/*.cc)
+set(BITSEL_TEST_SOURCES test/bitsel_test.cc)
+file(GLOB BITSEL_EXAMPLE_SOURCES example/*.cc)
 
 
 target_compile_options(
-    bitslice PRIVATE
+    bitsel PRIVATE
     -Werror
     -Wall
     -Wextra
@@ -46,7 +46,7 @@ include(cmake/clang_tidy.cmake)
 setup_clang_tidy()
 if(CLANG_TIDY_EXE AND USE_CLANG_TIDY)
     set_target_properties(
-        bitslice PROPERTIES
+        bitsel PROPERTIES
         CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
     )
 endif()

@@ -11,12 +11,12 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
     unit_tests
-    bitslice_test.cc
+    bitsel_test.cc
     )
 
 target_link_libraries(unit_tests
   PRIVATE
-    bitslice
+    bitsel
     gtest_main
   )
 

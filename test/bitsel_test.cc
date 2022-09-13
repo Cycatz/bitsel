@@ -2,13 +2,13 @@
 #include <gtest/gtest.h>
 #include <gtest/gtest_pred_impl.h>
 
-#include "bitslice.hpp"
+#include "bitsel.hpp"
 
 #include <array>
 #include <limits>
 
-using namespace bitslice;
-using namespace bitslice::literals;
+using namespace bitsel;
+using namespace bitsel::literals;
 using namespace std::string_literals;
 
 TEST(UIntConstructorTest, BasicTest)
@@ -623,7 +623,7 @@ TEST(bitstringConstructor, BinGetNBitsTest)
 
 TEST(GetNBitsTEST, BasicTest)
 {
-    using namespace bitslice::utils;
+    using namespace bitsel::utils;
     std::array<uint32_t, 4> arr = {0xde, 0xad, 0xbe, 0xef};
     std::reverse(arr.begin(), arr.end());
 
@@ -642,7 +642,7 @@ TEST(GetNBitsTEST, BasicTest)
 
 TEST(ToUInt64Test, BasicTest)
 {
-    using namespace bitslice::utils;
+    using namespace bitsel::utils;
     bits b = 0xDEADBEEF_U(32_W);
     uint32_t val = b.to_uint64();
 

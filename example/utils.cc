@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include "bitslice.hpp"
+#include "bitsel.hpp"
 
 
-using namespace bitslice;
-using namespace bitslice::literals;
+using namespace bitsel;
+using namespace bitsel::literals;
 
 
 bits byteswap(const bits &b)

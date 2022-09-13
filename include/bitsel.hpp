@@ -1,5 +1,5 @@
-#ifndef INCLUDE_BITSLICE_HPP_
-#define INCLUDE_BITSLICE_HPP_
+#ifndef INCLUDE_BITSEL_HPP_
+#define INCLUDE_BITSEL_HPP_
 
 #include <algorithm>
 #include <bitset>
@@ -16,7 +16,7 @@
 #include <vector>
 
 
-namespace bitslice
+namespace bitsel
 {
 
 /*
@@ -277,7 +277,7 @@ bits::bitstring::bitstring(const std::string &str)
 
 uint64_t bits::bitstring::get_nbits(std::size_t pos, std::size_t len) const
 {
-    using namespace bitslice::utils;
+    using namespace bitsel::utils;
 
     std::vector<uint32_t> v;
     v.reserve(width);
@@ -564,7 +564,7 @@ bool bits::operator==(const bits &rhs) const
 
 uint64_t bits::get_nbits(std::size_t pos, std::size_t digits) const
 {
-    using namespace bitslice::utils;
+    using namespace bitsel::utils;
     return utils::get_nbits<Block>(m_bitarr.get(), block_size, m_len, pos,
                                    digits);
 }
@@ -886,7 +886,7 @@ auto operator"" _S(const char *str, std::size_t sz)
 }  // namespace literals
 
 
-}  // namespace bitslice
+}  // namespace bitsel
 
 
 #endif  // INCLUDE_BITS_HPP_

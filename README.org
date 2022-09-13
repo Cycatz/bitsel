@@ -1,7 +1,7 @@
-* Bitscuit
-Header-only C++14 library provides a class ~bitscuit~ that represents a variable-size sequence of bits.
+* Bitsel
+/bitsel/ is a header-only C++14 library provides a class ~bits~ that represents a variable-size sequence of bits.
 
-Inspired from ~std::bitsets~ and /Verilog/ syntax of data representation and operations.
+Inspired from ~std::bitsets~ and [[https://github.com/chipsalliance/chisel3][chisel3]]-like syntax of data representation and operations.
 
 ** Features
 + C++14

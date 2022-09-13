@@ -1,11 +1,11 @@
 // ref: https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
 #include <iostream>
 
-#include "bitslice.hpp"
+#include "bitsel.hpp"
 
 
-using namespace bitslice;
-using namespace bitslice::literals;
+using namespace bitsel;
+using namespace bitsel::literals;
 
 
 #define ROUND 16

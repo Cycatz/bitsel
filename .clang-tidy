@@ -23,7 +23,7 @@ Checks: >
     -readability-magic-numbers,
     -misc-non-private-member-variables-in-classes
 WarningsAsErrors: ''
-HeaderFilterRegex: 'bitslice.*'
+HeaderFilterRegex: 'bitsel.*'
 AnalyzeTemporaryDtors: false
 FormatStyle: google
 CheckOptions:

@@ -25,7 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Build bitslice Python extension (even when the timestamp is clean):
+# Build bitsel Python extension (even when the timestamp is clean):
 #   make
 # Build verbosely:
 #   make VERBOSE=1
@@ -41,11 +41,11 @@ endif
 SKIP_PYTHON_EXECUTABLE ?= OFF
 HIDE_SYMBOL ?= OFF
 DEBUG_SYMBOL ?= ON
-BITSLICE_PROFILE ?= OFF
+BITSEL_PROFILE ?= OFF
 USE_CLANG_TIDY ?= ON
 CMAKE_BUILD_TYPE ?= Release
-BITSLICE_ROOT ?= $(shell pwd)
-CMAKE_INSTALL_PREFIX ?= $(BITSLICE_ROOT)/build/fakeinstall
+BITSEL_ROOT ?= $(shell pwd)
+CMAKE_INSTALL_PREFIX ?= $(BITSEL_ROOT)/build/fakeinstall
 CMAKE_ARGS ?=
 VERBOSE ?=
 
@@ -68,11 +68,11 @@ cmakeclean:
 
 .PHONY: cmake
 cmake: $(BUILD_PATH)/Makefile
-	cp $(BUILD_PATH)/compile_commands.json $(BITSLICE_ROOT)
+	cp $(BUILD_PATH)/compile_commands.json $(BITSEL_ROOT)
 
 .PHONY: build
 build: cmake
-	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) bitslice
+	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) bitsel
 
 .PHONY: install
 install: cmake
@@ -102,12 +102,12 @@ $(BUILD_PATH)/Makefile: CMakeLists.txt Makefile
 	mkdir -p $(BUILD_PATH) ; \
 	cd $(BUILD_PATH) ; \
 	env $(RUNENV) \
-		cmake $(BITSLICE_ROOT) \
+		cmake $(BITSEL_ROOT) \
 		-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
 		-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
 		-DHIDE_SYMBOL=$(HIDE_SYMBOL) \
 		-DDEBUG_SYMBOL=$(DEBUG_SYMBOL) \
 		-DUSE_CLANG_TIDY=$(USE_CLANG_TIDY) \
 		-DLINT_AS_ERRORS=ON \
-		-DBITSLICE_PROFILE=$(BITSLICE_PROFILE) \
+		-DBITSEL_PROFILE=$(BITSEL_PROFILE) \
 		$(CMAKE_ARGS)
