@@ -1,17 +1,16 @@
-add_executable(
-    example
-    example.cc
+function(make_example target)
+    add_executable("example-${target}" ${target}.cc)
+    set_target_properties("example-${target}" PROPERTIES OUTPUT_NAME "${target}")
+    target_link_libraries("example-${target}" PRIVATE bitslice)
+    target_compile_options(
+        "example-${target}" PRIVATE
+        -g
+        -Werror
+        -Wall
+        -Wextra
+        -Wno-noexcept-type # GCC
     )
+endfunction()
 
-target_link_libraries(example
-  PRIVATE
-    bitslice
-  )
-
-target_compile_options(
-    example PRIVATE
-    -Werror
-    -Wall
-    -Wextra
-    -Wno-noexcept-type # GCC
-)
+make_example(utils)
+make_example(des)
