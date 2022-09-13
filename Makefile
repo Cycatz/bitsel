@@ -84,9 +84,15 @@ test: cmake
 	$(BUILD_PATH)/test/unit_tests
 
 .PHONY: example
-example: cmake
-	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) example
-	$(BUILD_PATH)/example/example
+example: example-des example-utils
+
+.PHONY: example-des
+example-des: cmake
+	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) example-des
+
+.PHONY: example-utils
+example-utils: cmake
+	make -C $(BUILD_PATH) VERBOSE=$(VERBOSE) example-utils
 
 .PHONY: format
 format: $(BUILD_PATH)/Makefile
