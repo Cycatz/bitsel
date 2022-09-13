@@ -1,7 +1,7 @@
 * Bitsel
 /bitsel/ is a header-only C++14 library provides a class ~bits~ that represents a variable-size sequence of bits.
 
-Inspired from ~std::bitsets~ and [[https://github.com/chipsalliance/chisel3][chisel3]]-like syntax of data representation and operations.
+Inspired from ~std::bitset~ and [[https://github.com/chipsalliance/chisel3][chisel3]]-like syntax of data representation and operations.
 
 ** Features
 + C++14
@@ -10,6 +10,53 @@ Inspired from ~std::bitsets~ and [[https://github.com/chipsalliance/chisel3][chi
 + MIT License
 
 ** Examples
+#+begin_src cpp
+#include <iostream>
+#include "bitsel.hpp"
+
+using namespace bitsel;
+using namespace bitsel::literals;
+
+int main()
+{
+    // Create a 16-bit variable a which contains all '1's
+    bits a = bits::ones(16);
+
+    // Create a 32-bit variable b which contains 0xDEADBEEF
+    bits b = "0xDEADBEEF"_U(32_W);
+
+    // Create a 20-bit variable c which contains 0b101010
+    bits c{20, 0b101010};
+
+    // Create a 24-bit variable d which contains 0x101010
+    bits d = Fill(3, 0x10_U());
+
+    // Create a variable e which is the concatenation of a, b, c and d
+    bits e = {a, b, c, d};
+
+    // Set 3th bit of e to true
+    e.set(3, true);
+
+    // Set 28th bit of e to 17th bit of e
+    e.set(28, e[17]);
+
+    // Create a variable f which is the slice from 40th bit to 8th bit of e
+    bits f = e(39, 8);
+    // Create a variable g which is the slice from 7th bit to 0th bit of e
+    bits g = e(7, 0);
+
+    // Set e to f xor g, the length of e is now max(39 - 8 + 1, 7 - 0 + 1) =
+    // 32-bit
+    e = f ^ g;
+
+    // Print h in binary, octal and hex representations
+    std::cout << "Binary: " << e.to_string(num_base::bin) << "\n"
+              << "Octal: " << e.to_string(num_base::oct) << "\n"
+              << "Hex: " << e.to_string(num_base::hex) << "\n";
+}
+#+end_src
+
+You can refer [[file:example/][example]] for more examples.
 
 ** Integration
 
