@@ -1,5 +1,6 @@
 // ref: https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
 #include <iostream>
+#include <cassert>
 
 #include "bitsel.hpp"
 
@@ -299,8 +300,9 @@ bits DES(const bits &data, const bits &key)
 
 int main()
 {
-    // The first bit of data is "0". The last bit is "0". We read from left to right.
-    // So we need to reverse the bitstring at initialization and when printing
+    // The first bit of data is "0". The last bit is "0". We read from left to
+    // right. So we need to reverse the bitstring at initialization and when
+    // printing
     bits data = "0x0123456789ABCDEF"_U().reverse();
     bits key = "0x133457799BBCDFF1"_U().reverse();
 
@@ -308,6 +310,8 @@ int main()
     std::cout << "Key = " << key.reverse().to_string() << std::endl;
 
     bits enc_data = DES(data, key);
+
+    assert(enc_data == "0x85E813540F0AB405"_U());
     std::cout << "Encrypted Data = " << enc_data.reverse().to_string()
               << std::endl;
 }
