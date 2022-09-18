@@ -1,6 +1,5 @@
 // ref: https://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
 #include <iostream>
-#include <cassert>
 
 #include "bitsel.hpp"
 
@@ -311,7 +310,7 @@ int main()
 
     bits enc_data = DES(data, key);
 
-    assert(enc_data == "0x85E813540F0AB405"_U());
+    // Should be 85E813540F0AB405
     std::cout << "Encrypted Data = " << enc_data.reverse().to_string()
               << std::endl;
 }
