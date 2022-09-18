@@ -55,6 +55,9 @@ uint64_t get_nbits(const T *arr,
                                     std::to_string(max_num_digits) + ".");
     }
 
+    if (arr == nullptr)
+        return 0;
+
     /* Early return */
     if (pos >= len)
         return 0;
@@ -165,7 +168,7 @@ public:
         std::size_t guess_width(const std::string &bs, num_base base);
     };
 
-    bits() = delete;
+    bits() : bits{0, 0} {}
 
     explicit bits(std::size_t len, uint64_t val);
     explicit bits(std::size_t len, const bitstring &bs);
@@ -216,6 +219,7 @@ public:
                    std::size_t pos,
                    std::size_t digit = block_size);
 
+    bool empty() const;
     bool test(std::size_t pos) const;
     bool operator[](std::size_t pos) const;
 
@@ -351,9 +355,6 @@ std::size_t bits::bitstring::guess_width(const std::string &bs, num_base base)
 
 bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
 {
-    if (len == 0) {
-        throw std::invalid_argument("The length must not be zero");
-    }
     std::size_t arr_size = get_arr_size();
     m_bitarr = std::make_unique<Block[]>(arr_size);
     for (std::size_t i = 0, j = 0; j < arr_size; i += block_size, j++) {
@@ -364,10 +365,6 @@ bits::bits(std::size_t len, uint64_t val) : m_bitarr{nullptr}, m_len{len}
 
 bits::bits(std::size_t len, const bitstring &bs) : m_bitarr{nullptr}, m_len{len}
 {
-    if (len == 0) {
-        throw std::invalid_argument("The length must not be zero");
-    }
-
     std::size_t arr_size = get_arr_size();
     m_bitarr = std::make_unique<Block[]>(arr_size);
 
@@ -379,8 +376,8 @@ bits::bits(std::size_t len, const bitstring &bs) : m_bitarr{nullptr}, m_len{len}
 
 bits::bits(std::initializer_list<bits> l) : m_len(0)
 {
-    *this = *l.begin();
-    for (auto it = std::next(l.begin()); it != l.end(); it++) {
+    *this = bits{};
+    for (auto it = l.begin(); it != l.end(); it++) {
         this->append(*it);
     }
 }
@@ -423,6 +420,11 @@ bits &bits::operator=(bits &&rhs)
     return *this;
 }
 
+bool bits::empty() const
+{
+    return m_len == 0;
+}
+
 bool bits::test(std::size_t pos) const
 {
     if (pos >= m_len) {
@@ -433,6 +435,7 @@ bool bits::test(std::size_t pos) const
 
 bool bits::operator[](std::size_t pos) const
 {
+    /* No need to check perform bound checking */
     auto p = get_num_block(pos);
     return static_cast<bool>((m_bitarr[p.first] >> p.second) & 1);
 }
@@ -467,11 +470,13 @@ bits bits::reverse()
 bits &bits::repeat(uint64_t times)
 {
     if (times == 0) {
-        throw std::invalid_argument("The times must not be zero");
+        *this = bits{};
+        return *this;
     }
 
     /* Save the origin value; */
-    const bits b{*this};
+    /* Use () rather than {} to avoid applying initializer_list ctor */
+    const bits b(*this);
 
     for (uint64_t i = 0; i < times - 1; i++) {
         this->append(b);
@@ -481,6 +486,10 @@ bits &bits::repeat(uint64_t times)
 
 bits &bits::append(const bits &rhs)
 {
+    if (rhs.empty()) {
+        return *this;
+    }
+
     auto rhs_p = rhs.get_num_block();
 
     std::size_t new_arr_size = get_arr_size(m_len + rhs.m_len);
@@ -504,6 +513,8 @@ bits &bits::append(const bits &rhs)
 
     m_len = m_len + rhs.m_len;
     m_bitarr = std::move(new_bitarr);
+
+    trim_last_block();
     return *this;
 }
 
@@ -565,8 +576,8 @@ bool bits::operator==(const bits &rhs) const
 uint64_t bits::get_nbits(std::size_t pos, std::size_t digits) const
 {
     using namespace bitsel::utils;
-    return utils::get_nbits<Block>(m_bitarr.get(), block_size, m_len, pos,
-                                   digits);
+    return utils::get_nbits<Block>(this->empty() ? nullptr : m_bitarr.get(),
+                                   block_size, m_len, pos, digits);
 }
 
 void bits::set_nbits(uint64_t val, std::size_t pos, std::size_t digits)
@@ -801,7 +812,9 @@ bits &bits::operator+=(const bits &rhs)
 
 bits &bits::operator-=(const bits &rhs)
 {
-    (*this) += ~rhs + bits::ones(1);
+    if (!rhs.empty()) {
+        (*this) += ~rhs + bits::ones(1);
+    }
     return *this;
 }
 
@@ -817,9 +830,6 @@ bits bits::operator~() const
 
 bits Fill(uint64_t times, bits b)
 {
-    if (times == 0) {
-        throw std::invalid_argument("The times must not be zero");
-    }
     return b.repeat(times);
 }
 
