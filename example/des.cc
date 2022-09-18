@@ -204,7 +204,7 @@ bits get_new_r(const bits &l, const bits &r, const bits &k)
 
     // TODO: Be more elegant
     // Subtitution
-    bits sb = bits::zeros(32);
+    bits sb;
     for (uint32_t i = 0; i < 8; i++) {
         bits b = ke(6 * (i + 1) - 1, 6 * i);
 
@@ -215,8 +215,7 @@ bits get_new_r(const bits &l, const bits &r, const bits &k)
         bits a = bits{4, S[i][col][row]};
         a = a.reverse();
 
-        bits pa = i == 0 ? a : Cat(a, bits::zeros(4 * i));
-        sb |= pa;
+        sb = Cat(a, sb);
     }
     std::cout << "sb = " << sb.reverse().to_string() << std::endl;
 
