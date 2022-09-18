@@ -689,7 +689,7 @@ TEST(ANDTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b &= a;
-    EXPECT_EQ(b, 0_U(Width{a.get_size()}));
+    EXPECT_EQ(b, 0_U(W{a.get_size()}));
 }
 
 TEST(ANDTest, BasicTest)
@@ -799,7 +799,7 @@ TEST(SubtractTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b -= a;
-    EXPECT_EQ(b, 0x21524111_U(Width(a.get_size())));
+    EXPECT_EQ(b, 0x21524111_U(W(a.get_size())));
 }
 
 TEST(SubtractTest, BasicTest)
