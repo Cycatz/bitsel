@@ -11,6 +11,16 @@ using namespace bitsel;
 using namespace bitsel::literals;
 using namespace std::string_literals;
 
+
+TEST(UIntConstructorTest, EmptyTest)
+{
+    bits b0;
+    EXPECT_TRUE(b0.empty());
+
+    bits b0a{0, 0xAA};
+    EXPECT_TRUE(b0a.empty());
+}
+
 TEST(UIntConstructorTest, BasicTest)
 {
     bits b1{8, 0xAA};
@@ -30,6 +40,13 @@ TEST(UIntConstructorTest, AdvancedTest)
     EXPECT_EQ(b1, 0xA_U(4_W));
 }
 
+
+TEST(BitsBitsStringConstructorTest, EmptyTest)
+{
+    bits::bitstring bs0{"0xAA"};
+    bits b0{0, bs0};
+    EXPECT_TRUE(b0.empty());
+}
 
 TEST(BitsBitsStringConstructorTest, BasicTest)
 {
@@ -92,6 +109,12 @@ TEST(StringConstructorTest, ZeroLengthTest)
         std::invalid_argument);
 }
 
+TEST(CopyConstructorTest, ZeroLengthTest)
+{
+    bits b0;
+    bits b1(b0);
+    EXPECT_EQ(b0, b1);
+}
 
 TEST(CopyConstructorTest, BasicTest)
 {
@@ -100,6 +123,14 @@ TEST(CopyConstructorTest, BasicTest)
     EXPECT_EQ(b1, b2);
 }
 
+TEST(MoveConstructorTest, ZeroLengthTest)
+{
+    bits b1;
+    bits b2(std::move(b1));
+
+    EXPECT_TRUE(b1.empty());
+    EXPECT_TRUE(b2.empty());
+}
 
 TEST(MoveConstructorTest, BasicTest)
 {
@@ -110,6 +141,23 @@ TEST(MoveConstructorTest, BasicTest)
 }
 
 
+TEST(CopyAssignmentTest, ZeroLengthTest)
+{
+    bits b1{"0b010100010101000100001010100010101000100001"};
+    bits b2;
+
+    b2 = b1;
+    EXPECT_EQ(b1, b2);
+
+    bits b3;
+    bits b4{"0b010100010101000100001010100010101000100001"};
+    ;
+
+    b4 = b3;
+    EXPECT_TRUE(b4.empty());
+    EXPECT_EQ(b3, b4);
+}
+
 TEST(CopyAssignmentTest, BasicTest)
 {
     bits b1{"0b010100010101000100001010100010101000100001"};
@@ -117,6 +165,21 @@ TEST(CopyAssignmentTest, BasicTest)
 
     b2 = b1;
     EXPECT_EQ(b1, b2);
+}
+
+TEST(MoveAssignmentTest, ZeroLengthTest)
+{
+    bits b1{"0b010100010101000100001010100010101000100001"};
+    bits b2;
+
+    b2 = std::move(b1);
+    EXPECT_EQ(b2, "0b010100010101000100001010100010101000100001"_U());
+
+    bits b3;
+    bits b4{"0b010100010101000100001010100010101000100001"};
+
+    b4 = std::move(b3);
+    EXPECT_TRUE(b4.empty());
 }
 
 TEST(MoveAssignmentTest, BasicTest)
@@ -138,13 +201,23 @@ TEST(BitAccessTest, BasicTest)
     EXPECT_FALSE(b1[41]);
 }
 
+TEST(InitializerListConstructorTest, ZeroLengthTest)
+{
+    bits b_empty({});
+
+    bits b1, b2, b3, b4;
+    bits b_4_zero_vars = {b1, b2, b3, b4};
+
+    EXPECT_TRUE(b_4_zero_vars.empty());
+}
+
 TEST(InitializerListConstructorTest, BasicTest)
 {
     bits b1{"0b0101"};
     bits b2{"0b1101"};
 
     bits b3 = {b1, b2};
-    EXPECT_EQ(b3, "0b01011101"_U(8_W));
+    EXPECT_TRUE(b3 == "0b01011101"_U(8_W));
 
     bits b4{"0xABADBABE"};
     bits b5{"0xDEADBEEF"};
@@ -163,6 +236,14 @@ TEST(InitializerListConstructorTest, AdvancedTest)
 
     bits b = {b1, b2, b3, b4};
     EXPECT_EQ(b, "0xDEADEAAAAAA2A425542"_U(76_W));
+}
+
+TEST(ToStringTestValid, EmptyTest)
+{
+    bits b0;
+    EXPECT_EQ(b0.to_string(num_base::bin), "");
+    EXPECT_EQ(b0.to_string(num_base::hex), "");
+    EXPECT_EQ(b0.to_string(num_base::oct), "");
 }
 
 TEST(ToStringTestValid, ZeroArgument)
@@ -224,6 +305,67 @@ TEST(SliceTestValid, AdvancedTest)
     EXPECT_EQ(b2a(44, 13), b2b);
 }
 
+TEST(SliceTestInValid, BasicTest)
+{
+    EXPECT_THROW(
+        {
+            try {
+                bits b0;
+                bits t0 = b0(0, 0);
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("range error", e.what());
+                throw;
+            }
+        },
+        std::out_of_range);
+
+    EXPECT_THROW(
+        {
+            try {
+                bits b1;
+                bits t1 = b1(0, 1);
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("range error", e.what());
+                throw;
+            }
+        },
+        std::out_of_range);
+
+    EXPECT_THROW(
+        {
+            try {
+                bits b2 = bits::zeros(4);
+                bits t2 = b2(0, 3);
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("range error", e.what());
+                throw;
+            }
+        },
+        std::out_of_range);
+
+    EXPECT_THROW(
+        {
+            try {
+                bits b3 = bits::zeros(4);
+                bits t3 = b3(b3.get_size(), 0);
+            } catch (const std::invalid_argument &e) {
+                EXPECT_STREQ("range error", e.what());
+                throw;
+            }
+        },
+        std::out_of_range);
+}
+
+TEST(GetNBitsTest, ZeroLengthTest)
+{
+    bits b;
+    auto i = b.get_nbits(0, 6);
+    EXPECT_TRUE(i == 0);
+
+    auto j = b.get_nbits(100, 10);
+    EXPECT_TRUE(j == 0);
+}
+
 TEST(GetNBitsTest, BasicTest)
 {
     bits b = 0xDEADBEEF_U(32_W);
@@ -233,6 +375,15 @@ TEST(GetNBitsTest, BasicTest)
     bits c = 0xDEADBEEFDEADBEEF_U(64_W);
     i = c.get_nbits(20, 32);
     EXPECT_TRUE(i == 0xDBEEFDEA);
+}
+
+TEST(SetNBitsTest, ZeroLengthTest)
+{
+    bits b;
+    b.set_nbits(0x1E, 0, 6);
+    b.set_nbits(0xFEEDBABE, 20, 32);
+
+    EXPECT_TRUE(b.empty());
 }
 
 TEST(SetNBitsTest, BasicTest)
@@ -246,6 +397,12 @@ TEST(SetNBitsTest, BasicTest)
     EXPECT_TRUE(c == 0xDEAFEEDBABEDBEEF_U(64_W));
 }
 
+TEST(EmptyTest, BasicTest)
+{
+    bits b;
+    EXPECT_TRUE(b.empty());
+    EXPECT_EQ(b, bits{});
+}
 
 TEST(ReverseTest, BasicTest)
 {
@@ -261,6 +418,34 @@ TEST(ReverseTest, BasicTest)
     EXPECT_EQ(d, "0xFF77BB33DD55"_U());
 }
 
+TEST(RepeatTest, ZeroLengthTest)
+{
+    bits a;
+    a.repeat(3);
+    EXPECT_TRUE(a.empty());
+
+    bits b;
+    b.repeat(10000);
+    EXPECT_TRUE(b.empty());
+
+    bits c;
+    c.repeat(0);
+    EXPECT_TRUE(c.empty());
+}
+
+TEST(RepeatTest, ZeroTimeTest)
+{
+    bits a{"0b01010"};
+    a.repeat(0);
+
+    EXPECT_TRUE(a.empty());
+
+    bits b{"0xDEADBEEF"};
+    b.repeat(0);
+
+    EXPECT_TRUE(b.empty());
+}
+
 TEST(RepeatTest, BasicTest)
 {
     bits a{"0b01010"};
@@ -269,6 +454,25 @@ TEST(RepeatTest, BasicTest)
     EXPECT_EQ(a, "0b010100101001010"_U());
 }
 
+TEST(AppendTest, ZeroLengthTest)
+{
+    bits a;
+    bits b{"0b01100"};
+
+    a.append(b);
+    EXPECT_EQ(a, b);
+
+    bits c{"0b01100"};
+    bits d;
+    c.append(d);
+    EXPECT_EQ(c, "0b01100"_U());
+
+
+    bits e;
+    bits f;
+    e.append(f);
+    EXPECT_TRUE(e.empty());
+}
 
 TEST(AppendTest, BasicTest)
 {
@@ -286,6 +490,32 @@ TEST(AppendTest, AdvancedTest)
 
     a.append(b);
     EXPECT_EQ(a, "0xBADBABEEBABDAB"_U());
+}
+
+TEST(FillTest, ZeroLengthTest)
+{
+    bits a;
+    bits b = Fill(3, a);
+    EXPECT_TRUE(b.empty());
+
+    bits c;
+    bits d = Fill(10000, b);
+    EXPECT_TRUE(d.empty());
+
+    bits e;
+    bits f = Fill(0, a);
+    EXPECT_TRUE(f.empty());
+}
+
+TEST(FillTest, ZeroTimeTest)
+{
+    bits a{"0b01010"};
+    bits b = Fill(0, a);
+    EXPECT_TRUE(b.empty());
+
+    bits c{"0xDEADBEEF"};
+    bits d = Fill(0, b);
+    EXPECT_TRUE(d.empty());
 }
 
 TEST(FillTest, BasicTest)
@@ -314,6 +544,23 @@ TEST(CatTest, BasicTest)
     EXPECT_EQ(g, "0xEADBEEFDDDEADBEEF"_U());
 }
 
+TEST(RightShiftTest, ZeroLengthTest)
+{
+    bits b;
+    bits t;
+
+    t = b >> 0;
+    EXPECT_TRUE(t.empty());
+
+    t = b >> 10;
+    EXPECT_TRUE(t.empty());
+
+    t = b >> 1000;
+    EXPECT_TRUE(t.empty());
+
+    t = b >> 10000;
+    EXPECT_TRUE(t.empty());
+}
 
 TEST(RightShiftTest, BasicTest)
 {
@@ -351,6 +598,24 @@ TEST(RightShiftTest, BasicTest)
     a >>= 100000;
     EXPECT_TRUE(a == 0_U(64_W));
     EXPECT_TRUE(b == 0_U(64_W));
+}
+
+TEST(LeftShiftTest, ZeroLengthTest)
+{
+    bits b;
+    bits t;
+
+    t = b << 0;
+    EXPECT_TRUE(t.empty());
+
+    t = b << 10;
+    EXPECT_TRUE(t.empty());
+
+    t = b << 1000;
+    EXPECT_TRUE(t.empty());
+
+    t = b << 10000;
+    EXPECT_TRUE(t.empty());
 }
 
 TEST(LeftShiftTest, TwoBlockTest)
@@ -413,6 +678,19 @@ TEST(LeftShiftTest, LargeShiftTest)
     EXPECT_TRUE(b == 0b00000000_U(8_W));
 }
 
+TEST(ANDTest, ZeroLengthTest)
+{
+    bits a;
+    bits b;
+    bits c;
+
+    c = a & b;
+    EXPECT_TRUE(c.empty());
+
+    a = 0xDEADBEEF_U();
+    b &= a;
+    EXPECT_EQ(b, 0_U(Width{a.get_size()}));
+}
 
 TEST(ANDTest, BasicTest)
 {
@@ -425,6 +703,20 @@ TEST(ANDTest, BasicTest)
 
     bits d = a & c;
     EXPECT_EQ(d, "0x0"_U(44_W));
+}
+
+TEST(ORTest, ZeroLengthTest)
+{
+    bits a;
+    bits b;
+    bits c;
+
+    c = a | b;
+    EXPECT_TRUE(c.empty());
+
+    a = 0xDEADBEEF_U();
+    b |= a;
+    EXPECT_EQ(b, 0xDEADBEEF_U());
 }
 
 TEST(ORTest, BasicTest)
@@ -440,6 +732,20 @@ TEST(ORTest, BasicTest)
     EXPECT_EQ(d, "0xFFADBEFFABE"_U(44_W));
 }
 
+TEST(XORTest, ZeroLengthTest)
+{
+    bits a;
+    bits b;
+    bits c;
+
+    c = a ^ b;
+    EXPECT_TRUE(c.empty());
+
+    a = 0xDEADBEEF_U();
+    b ^= a;
+    EXPECT_EQ(b, 0xDEADBEEF_U());
+}
+
 TEST(XORTest, BasicTest)
 {
     bits a{"0xDEADBEEF224"};
@@ -451,6 +757,20 @@ TEST(XORTest, BasicTest)
 
     bits d = a ^ c;
     EXPECT_EQ(d, "0x7500045189E"_U(44_W));
+}
+
+TEST(PlusTest, ZeroLengthTest)
+{
+    bits a;
+    bits b;
+    bits c;
+
+    c = a + b;
+    EXPECT_TRUE(c.empty());
+
+    a = 0xDEADBEEF_U();
+    b += a;
+    EXPECT_EQ(b, 0xDEADBEEF_U());
 }
 
 TEST(PlusTest, BasicTest)
@@ -468,6 +788,20 @@ TEST(PlusTest, BasicTest)
     EXPECT_EQ(d, "0x8A5B79ADCDE"_U(44_W));
 }
 
+TEST(SubtractTest, ZeroLengthTest)
+{
+    bits a;
+    bits b;
+    bits c;
+
+    c = a - b;
+    EXPECT_TRUE(c.empty());
+
+    a = 0xDEADBEEF_U();
+    b -= a;
+    EXPECT_EQ(b, 0x21524111_U(Width(a.get_size())));
+}
+
 TEST(SubtractTest, BasicTest)
 {
     /* TODO: Need more robust tests */
@@ -483,6 +817,12 @@ TEST(SubtractTest, BasicTest)
     EXPECT_EQ(a, "0x875249721d4"_U(44_W));
 }
 
+TEST(NOTTest, ZeroLengthTest)
+{
+    bits b;
+    EXPECT_EQ(b, ~b);
+}
+
 TEST(NOTTest, BasicTest)
 {
     bits a{"0xDEADBEEF1234567890"};
@@ -494,10 +834,14 @@ TEST(NOTTest, BasicTest)
 
 TEST(bitstringConstructor, BasicStringTest)
 {
+    bits::bitstring bs0{"0x"};
     bits::bitstring bs1{"0xDeadbEef"};
     bits::bitstring bs2{"0b10101011"};
     bits::bitstring bs3{"0o73737373"};
 
+    EXPECT_TRUE(bs0.get_base() == num_base::hex);
+    EXPECT_TRUE(bs0.get_bitstr() == "");
+    EXPECT_TRUE(bs0.get_width() == 0);
 
     EXPECT_TRUE(bs1.get_base() == num_base::hex);
     EXPECT_TRUE(bs1.get_bitstr() == "deadbeef");
@@ -580,7 +924,8 @@ TEST(bitstringConstructor, HexGetNBitsTest)
 {
     bits::bitstring bs{"0xDEADBEEF"};
 
-    std::array<uint32_t, 7> testcases = {
+    std::array<uint32_t, 8> testcases = {
+        0,                   // Zero
         8,  16, 17, 21, 24,  // Normal test cases
         32, 36               // Out-of-bound test cases
     };
@@ -595,7 +940,8 @@ TEST(bitstringConstructor, OctGetNBitsTest)
 {
     bits::bitstring bs{"0o1234567"};
 
-    std::array<uint32_t, 7> testcases = {
+    std::array<uint32_t, 8> testcases = {
+        0,                   // Zero
         3,  11, 14, 18, 20,  // Normal test cases
         21, 40               // Out-of-bound test cases
     };
@@ -610,7 +956,8 @@ TEST(bitstringConstructor, BinGetNBitsTest)
 {
     bits::bitstring bs{"0b11011100"};
 
-    std::array<uint32_t, 5> testcases = {
+    std::array<uint32_t, 6> testcases = {
+        0,        // Zero
         2, 3, 7,  // Normal test cases
         8, 10     // Out-of-bound test cases
     };
@@ -621,15 +968,26 @@ TEST(bitstringConstructor, BinGetNBitsTest)
     }
 }
 
+TEST(GetNBitsTEST, NullPtrTest)
+{
+    using namespace bitsel::utils;
+    uint64_t res = get_nbits<uint32_t>(nullptr, 8, 32, 0, 32);
+    EXPECT_EQ(res, 0);
+}
+
 TEST(GetNBitsTEST, BasicTest)
 {
+    /* TODO: Need more robust tests */
+    /* E.g., blkdg = 0, len = 0, ... */
+
     using namespace bitsel::utils;
     std::array<uint32_t, 4> arr = {0xde, 0xad, 0xbe, 0xef};
     std::reverse(arr.begin(), arr.end());
 
     uint32_t *arr_ptr = static_cast<uint32_t *>(arr.data());
 
-    std::array<uint32_t, 7> testcases = {
+    std::array<uint32_t, 8> testcases = {
+        0,                   // Zero
         8,  16, 17, 21, 24,  // Normal test cases
         32, 36               // Out-of-bound test cases
     };
