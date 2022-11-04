@@ -1006,3 +1006,15 @@ TEST(ToUInt64Test, BasicTest)
 
     EXPECT_EQ(val, 0xDEADBEEF);
 }
+
+TEST(CountTest, BasicTest)
+{
+    bits b1 = bits::zeros(16);
+    EXPECT_EQ(b1.count(), 0);
+
+    bits b2 = bits::ones(16);
+    EXPECT_EQ(b2.count(), 16);
+
+    bits b3 = "0xDEADBEEF"_U(32_W);
+    EXPECT_EQ(b3.count(), 24);
+}

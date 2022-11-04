@@ -2,10 +2,10 @@
 #define INCLUDE_BITSEL_HPP_
 
 #include <algorithm>
-#include <bitset>
 #include <cctype>
 #include <cmath>    // for log2()
 #include <cstddef>  // for size_t
+#include <exception>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
@@ -218,6 +218,7 @@ public:
     void set_nbits(uint64_t val,
                    std::size_t pos,
                    std::size_t digit = block_size);
+    std::size_t count();
 
     bool empty() const;
     bool test(std::size_t pos) const;
@@ -632,6 +633,15 @@ void bits::set_nbits(uint64_t val, std::size_t pos, std::size_t digits)
             val >>= block_size;
         }
     }
+}
+std::size_t bits::count()
+{
+    std::size_t sz = get_arr_size();
+    std::size_t res = 0;
+    for (std::size_t i = 0; i < sz; i++) {
+        res += __builtin_popcount(m_bitarr[i]);
+    }
+    return res;
 }
 
 void bits::trim_last_block()
