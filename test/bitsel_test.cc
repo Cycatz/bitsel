@@ -201,6 +201,36 @@ TEST(BitAccessTest, BasicTest)
     EXPECT_FALSE(b1[41]);
 }
 
+TEST(BitSetTest, BasicTest)
+{
+    bits b_base = "0xDEADBEEF"_U(32_W);
+    bits b_test = b_base;
+
+    // 0 -> 0
+    ASSERT_FALSE(b_test[29]);
+    b_test.set(29, false);
+    ASSERT_EQ(b_test, b_base);
+    b_test = b_base;
+
+    // 0 -> 1
+    ASSERT_FALSE(b_test[24]);
+    b_test.set(24, true);
+    ASSERT_EQ(b_test, b_base ^ bits(32, 1 << 24));
+    b_test = b_base;
+
+    // 1 -> 0
+    ASSERT_TRUE(b_test[21]);
+    b_test.set(21, false);
+    ASSERT_EQ(b_test, b_base ^ bits(32, 1 << 21));
+    b_test = b_base;
+
+    // 1 -> 1
+    ASSERT_TRUE(b_test[19]);
+    b_test.set(19, true);
+    ASSERT_EQ(b_test, b_base);
+    b_test = b_base;
+}
+
 TEST(InitializerListConstructorTest, ZeroLengthTest)
 {
     bits b_empty({});
