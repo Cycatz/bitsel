@@ -378,7 +378,7 @@ bits::bits(std::size_t len, const bitstring &bs) : m_bitarr{nullptr}, m_len{len}
 bits::bits(std::initializer_list<bits> l) : m_len(0)
 {
     *this = bits{};
-    for (auto it = l.begin(); it != l.end(); it++) {
+    for (auto it = std::rbegin(l); it != std::rend(l); it++) {
         this->append(*it);
     }
 }
@@ -487,25 +487,28 @@ bits &bits::append(const bits &rhs)
         return *this;
     }
 
-    auto rhs_p = rhs.get_num_block();
+    const auto p = get_num_block();
 
     std::size_t new_arr_size = get_arr_size(m_len + rhs.m_len);
     auto new_bitarr = std::make_unique<Block[]>(new_arr_size);
-    std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
+    std::copy_n(m_bitarr.get(), get_arr_size(), new_bitarr.get());
 
-    std::size_t ioff = rhs_p.second;
-    std::size_t iidx = rhs.get_arr_size() - 1;
-    std::size_t ipos = rhs_p.second == 0 ? 0 : block_size - ioff;
+    if (this->empty()) {
+        std::copy_n(rhs.m_bitarr.get(), rhs.get_arr_size(), new_bitarr.get());
+    } else {
+        std::size_t last_block_left = p.second;
+        std::size_t last_block_idx = get_arr_size() - 1;
+        std::size_t block_off = p.second == 0 ? 0 : (block_size - p.second);
 
-    /* Handle residue bits */
-    if (rhs_p.second != 0) {
-        new_bitarr[iidx] |= m_bitarr[0] << ioff;
-    }
-    iidx++;
+        /* Handle residue bits */
+        if (last_block_left != 0) {
+            new_bitarr[last_block_idx] |= rhs.m_bitarr[0] << last_block_left;
+        }
 
-    for (std::size_t i = iidx, j = ipos; i < new_arr_size;
-         i++, j += block_size) {
-        new_bitarr[i] = get_nbits(j, block_size);
+        for (std::size_t i = last_block_idx + 1, j = block_off;
+             i < new_arr_size; i++, j += block_size) {
+            new_bitarr[i] = rhs.get_nbits(j, block_size);
+        }
     }
 
     m_len = m_len + rhs.m_len;
@@ -840,10 +843,10 @@ bits Fill(uint64_t times, bits b)
 }
 
 
-bits Cat(bits lhs, const bits &rhs)
+bits Cat(const bits &lhs, bits rhs)
 {
-    lhs.append(rhs);
-    return lhs;
+    rhs.append(lhs);
+    return rhs;
 }
 
 

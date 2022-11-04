@@ -510,7 +510,7 @@ TEST(AppendTest, BasicTest)
     bits b{"0b01100"};
 
     a.append(b);
-    EXPECT_EQ(a, "0b0101001100"_U());
+    EXPECT_EQ(a, "0b0110001010"_U());
 }
 
 TEST(AppendTest, AdvancedTest)
@@ -519,7 +519,7 @@ TEST(AppendTest, AdvancedTest)
     bits b{"0xEBABDAB"};
 
     a.append(b);
-    EXPECT_EQ(a, "0xBADBABEEBABDAB"_U());
+    EXPECT_EQ(a, "0xEBABDABBADBABE"_U());
 }
 
 TEST(FillTest, ZeroLengthTest)
