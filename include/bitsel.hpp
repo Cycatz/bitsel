@@ -447,13 +447,9 @@ void bits::set(std::size_t pos, bool val) const
         throw std::out_of_range("Position is out of range");
     }
 
-    auto p = get_num_block(pos);
-    const Block mask = static_cast<Block>(val) << p.second;
-
-    if (m_bitarr[p.first] & (1 << p.second)) {
-        m_bitarr[p.first] &= mask;
-    } else {
-        m_bitarr[p.first] |= mask;
+    if (this->operator[](pos) ^ val) {
+        const auto &p = get_num_block(pos);
+        m_bitarr[p.first] ^= 1 << p.second;
     }
 }
 
