@@ -200,7 +200,7 @@ public:
     ~bits() = default;  // destructor
 
     bits reverse();
-    constexpr std::size_t get_size() const { return m_len; }
+    constexpr std::size_t width() const { return m_len; }
 
     bits &repeat(uint64_t);
     bits &append(const bits &);

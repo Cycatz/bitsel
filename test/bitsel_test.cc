@@ -377,7 +377,7 @@ TEST(SliceTestInValid, BasicTest)
         {
             try {
                 bits b3 = bits::zeros(4);
-                bits t3 = b3(b3.get_size(), 0);
+                bits t3 = b3(b3.width(), 0);
             } catch (const std::invalid_argument &e) {
                 EXPECT_STREQ("range error", e.what());
                 throw;
@@ -719,7 +719,7 @@ TEST(ANDTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b &= a;
-    EXPECT_EQ(b, 0_U(W{a.get_size()}));
+    EXPECT_EQ(b, 0_U(W{a.width()}));
 }
 
 TEST(ANDTest, BasicTest)
@@ -829,7 +829,7 @@ TEST(SubtractTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b -= a;
-    EXPECT_EQ(b, 0x21524111_U(W(a.get_size())));
+    EXPECT_EQ(b, 0x21524111_U(W(a.width())));
 }
 
 TEST(SubtractTest, BasicTest)
