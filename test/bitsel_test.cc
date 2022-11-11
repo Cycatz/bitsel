@@ -719,7 +719,7 @@ TEST(ANDTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b &= a;
-    EXPECT_EQ(b, 0_U(W{a.width()}));
+    EXPECT_EQ(b, 0_U(bitwidth{a.width()}));
 }
 
 TEST(ANDTest, BasicTest)
@@ -829,7 +829,7 @@ TEST(SubtractTest, ZeroLengthTest)
 
     a = 0xDEADBEEF_U();
     b -= a;
-    EXPECT_EQ(b, 0x21524111_U(W(a.width())));
+    EXPECT_EQ(b, 0x21524111_U(bitwidth(a.width())));
 }
 
 TEST(SubtractTest, BasicTest)

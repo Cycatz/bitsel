@@ -858,32 +858,32 @@ namespace literals
  * W struct, acted as an std::optional
  */
 
-struct W {
+struct bitwidth {
     unsigned long long width;
     bool empty;
 
-    W() : width{0}, empty{true} {}
-    explicit W(unsigned long long v) : width{v}, empty{false} {}
+    bitwidth() : width{0}, empty{true} {}
+    explicit bitwidth(unsigned long long v) : width{v}, empty{false} {}
 };
 
 auto operator"" _W(unsigned long long len)
 {
-    return W(len);
+    return bitwidth(len);
 }
 
 auto operator"" _U(unsigned long long val)
 {
-    return [=](W w = W{}) { return w.empty ? bits{val} : bits{w.width, val}; };
+    return [=](bitwidth w = bitwidth{}) { return w.empty ? bits{val} : bits{w.width, val}; };
 }
 
 auto operator"" _S(unsigned long long val)
 {
-    return [=](W w = W{}) { return w.empty ? bits{val} : bits{w.width, val}; };
+    return [=](bitwidth w = bitwidth{}) { return w.empty ? bits{val} : bits{w.width, val}; };
 }
 
 auto operator"" _U(const char *str, std::size_t sz)
 {
-    return [=](W w = W{}) {
+    return [=](bitwidth w = bitwidth{}) {
         return w.empty ? bits{std::string{str, sz}}
                        : bits{w.width, std::string{str, sz}};
     };
@@ -891,7 +891,7 @@ auto operator"" _U(const char *str, std::size_t sz)
 
 auto operator"" _S(const char *str, std::size_t sz)
 {
-    return [=](W w = W{}) {
+    return [=](bitwidth w = bitwidth{}) {
         return w.empty ? bits{std::string{str, sz}}
                        : bits{w.width, std::string{str, sz}};
     };
