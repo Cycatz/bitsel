@@ -866,7 +866,7 @@ struct bitwidth {
     explicit bitwidth(unsigned long long v) : width{v}, empty{false} {}
 };
 
-auto operator"" _W(unsigned long long len)
+auto operator"" _w(unsigned long long len)
 {
     return bitwidth(len);
 }

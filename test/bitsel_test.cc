@@ -24,20 +24,20 @@ TEST(UIntConstructorTest, EmptyTest)
 TEST(UIntConstructorTest, BasicTest)
 {
     bits b1{8, 0xAA};
-    EXPECT_EQ(b1, 0xAA_u(8_W));
+    EXPECT_EQ(b1, 0xAA_u(8_w));
 
     bits b2{10, 0xBC};
-    EXPECT_EQ(b2, 0xBC_u(10_W));
+    EXPECT_EQ(b2, 0xBC_u(10_w));
 
     bits b3{64, 0xDEADBEEFDEADBEEF};
-    EXPECT_EQ(b3, 0xDEADBEEFDEADBEEF_u(64_W));
+    EXPECT_EQ(b3, 0xDEADBEEFDEADBEEF_u(64_w));
 }
 
 TEST(UIntConstructorTest, AdvancedTest)
 {
     /* The length is smaller the width of the value */
     bits b1{4, 0xAA};
-    EXPECT_EQ(b1, 0xA_u(4_W));
+    EXPECT_EQ(b1, 0xA_u(4_w));
 }
 
 
@@ -52,34 +52,34 @@ TEST(BitsBitsStringConstructorTest, BasicTest)
 {
     bits::bitstring bs1{"0xDEADbeef"};
     bits b1{bs1};
-    EXPECT_EQ(b1, "0xDEADBEEF"_u(32_W));
+    EXPECT_EQ(b1, "0xDEADBEEF"_u(32_w));
 
     bits::bitstring bs2{"0o72733"};
     bits b2{20, bs2};
-    EXPECT_EQ(b2, "0o72733"_u(20_W));
+    EXPECT_EQ(b2, "0o72733"_u(20_w));
 
     bits::bitstring bs3{"0b1101010101"};
     bits b3{30, bs3};
-    EXPECT_EQ(b3, "0b1101010101"_u(30_W));
+    EXPECT_EQ(b3, "0b1101010101"_u(30_w));
 }
 
 TEST(BitsBitsStringConstructorTest, AdvancedTest)
 {
     bits::bitstring bs1{"0xDEADbeef"};
     bits b1{10, bs1};
-    EXPECT_EQ(b1, "0b1011101111"_u(10_W));
+    EXPECT_EQ(b1, "0b1011101111"_u(10_w));
 }
 
 TEST(StringConstructorTest, BasicTest)
 {
     bits b1{"0b0101"};
-    EXPECT_EQ(b1, "0b0101"_u(4_W));
+    EXPECT_EQ(b1, "0b0101"_u(4_w));
 }
 
 TEST(StringConstructorTest, LongWidthTest)
 {
     bits b1{"0xABCDEF1234567890CAFE"};
-    EXPECT_EQ(b1, "0xABCDEF1234567890CAFE"_u(80_W));
+    EXPECT_EQ(b1, "0xABCDEF1234567890CAFE"_u(80_w));
 }
 
 TEST(StringConstructorTest, ZeroLengthTest)
@@ -137,7 +137,7 @@ TEST(MoveConstructorTest, BasicTest)
     bits b1{"0xABADBABE"};
     bits b2(std::move(b1));
 
-    EXPECT_EQ(b2, "0xABADBABE"_u(32_W));
+    EXPECT_EQ(b2, "0xABADBABE"_u(32_w));
 }
 
 
@@ -203,7 +203,7 @@ TEST(BitAccessTest, BasicTest)
 
 TEST(BitSetTest, BasicTest)
 {
-    bits b_base = "0xDEADBEEF"_u(32_W);
+    bits b_base = "0xDEADBEEF"_u(32_w);
     bits b_test = b_base;
 
     // 0 -> 0
@@ -247,25 +247,25 @@ TEST(InitializerListConstructorTest, BasicTest)
     bits b2{"0b1101"};
 
     bits b3 = {b1, b2};
-    EXPECT_TRUE(b3 == "0b01011101"_u(8_W));
+    EXPECT_TRUE(b3 == "0b01011101"_u(8_w));
 
     bits b4{"0xABADBABE"};
     bits b5{"0xDEADBEEF"};
 
     bits b6 = {b4, b5};
-    EXPECT_EQ(b6, "0xABADBABEDEADBEEF"_u(64_W));
+    EXPECT_EQ(b6, "0xABADBABEDEADBEEF"_u(64_w));
 }
 
 
 TEST(InitializerListConstructorTest, AdvancedTest)
 {
-    bits b1 = "0xDEADE"_u(20_W);
-    bits b2 = "0xAAAAAA"_u(24_W);
-    bits b3 = "0o124411"_u(18_W);
-    bits b4 = "0b01010101000010"_u(14_W);
+    bits b1 = "0xDEADE"_u(20_w);
+    bits b2 = "0xAAAAAA"_u(24_w);
+    bits b3 = "0o124411"_u(18_w);
+    bits b4 = "0b01010101000010"_u(14_w);
 
     bits b = {b1, b2, b3, b4};
-    EXPECT_EQ(b, "0xDEADEAAAAAA2A425542"_u(76_W));
+    EXPECT_EQ(b, "0xDEADEAAAAAA2A425542"_u(76_w));
 }
 
 TEST(ToStringTestValid, EmptyTest)
@@ -398,11 +398,11 @@ TEST(GetNBitsTest, ZeroLengthTest)
 
 TEST(GetNBitsTest, BasicTest)
 {
-    bits b = 0xDEADBEEF_u(32_W);
+    bits b = 0xDEADBEEF_u(32_w);
     auto i = b.get_nbits(0, 6);
     EXPECT_TRUE(i == 0x2f);
 
-    bits c = 0xDEADBEEFDEADBEEF_u(64_W);
+    bits c = 0xDEADBEEFDEADBEEF_u(64_w);
     i = c.get_nbits(20, 32);
     EXPECT_TRUE(i == 0xDBEEFDEA);
 }
@@ -418,13 +418,13 @@ TEST(SetNBitsTest, ZeroLengthTest)
 
 TEST(SetNBitsTest, BasicTest)
 {
-    bits b = 0xDEADBEEF_u(32_W);
+    bits b = 0xDEADBEEF_u(32_w);
     b.set_nbits(0x1E, 0, 6);
-    EXPECT_TRUE(b == 0xDEADBEDE_u(32_W));
+    EXPECT_TRUE(b == 0xDEADBEDE_u(32_w));
 
-    bits c = 0xDEADBEEFDEADBEEF_u(64_W);
+    bits c = 0xDEADBEEFDEADBEEF_u(64_w);
     c.set_nbits(0xFEEDBABE, 20, 32);
-    EXPECT_TRUE(c == 0xDEAFEEDBABEDBEEF_u(64_W));
+    EXPECT_TRUE(c == 0xDEAFEEDBABEDBEEF_u(64_w));
 }
 
 TEST(EmptyTest, BasicTest)
@@ -601,33 +601,33 @@ TEST(RightShiftTest, BasicTest)
 
     b = a >> 0;
     a >>= 0;
-    EXPECT_TRUE(a == 0xDEADBEEF12345678_u(64_W));
-    EXPECT_TRUE(b == 0xDEADBEEF12345678_u(64_W));
+    EXPECT_TRUE(a == 0xDEADBEEF12345678_u(64_w));
+    EXPECT_TRUE(b == 0xDEADBEEF12345678_u(64_w));
 
     b = a >> 4;
     a >>= 4;
-    EXPECT_TRUE(a == 0x0DEADBEEF1234567_u(64_W));
-    EXPECT_TRUE(b == 0x0DEADBEEF1234567_u(64_W));
+    EXPECT_TRUE(a == 0x0DEADBEEF1234567_u(64_w));
+    EXPECT_TRUE(b == 0x0DEADBEEF1234567_u(64_w));
 
     b = a >> 1;
     a >>= 1;
-    EXPECT_TRUE(a == 0x06F56DF77891A2B3_u(64_W));
-    EXPECT_TRUE(b == 0x06F56DF77891A2B3_u(64_W));
+    EXPECT_TRUE(a == 0x06F56DF77891A2B3_u(64_w));
+    EXPECT_TRUE(b == 0x06F56DF77891A2B3_u(64_w));
 
     b = a >> 7;
     a >>= 7;
-    EXPECT_TRUE(a == 0x000DEADBEEF12345_u(64_W));
-    EXPECT_TRUE(b == 0x000DEADBEEF12345_u(64_W));
+    EXPECT_TRUE(a == 0x000DEADBEEF12345_u(64_w));
+    EXPECT_TRUE(b == 0x000DEADBEEF12345_u(64_w));
 
     b = a >> 20;
     a >>= 20;
-    EXPECT_TRUE(a == 0x00000000DEADBEEF_u(64_W));
-    EXPECT_TRUE(b == 0x00000000DEADBEEF_u(64_W));
+    EXPECT_TRUE(a == 0x00000000DEADBEEF_u(64_w));
+    EXPECT_TRUE(b == 0x00000000DEADBEEF_u(64_w));
 
     b = a >> 100000;
     a >>= 100000;
-    EXPECT_TRUE(a == 0_u(64_W));
-    EXPECT_TRUE(b == 0_u(64_W));
+    EXPECT_TRUE(a == 0_u(64_w));
+    EXPECT_TRUE(b == 0_u(64_w));
 }
 
 TEST(LeftShiftTest, ZeroLengthTest)
@@ -657,23 +657,23 @@ TEST(LeftShiftTest, TwoBlockTest)
 
     b = a << 0;
     a <<= 0;
-    EXPECT_TRUE(a == 0x1DEADBEEF_u(36_W));
-    EXPECT_TRUE(b == 0x1DEADBEEF_u(36_W));
+    EXPECT_TRUE(a == 0x1DEADBEEF_u(36_w));
+    EXPECT_TRUE(b == 0x1DEADBEEF_u(36_w));
 
     b = a << 4;
     a <<= 4;
-    EXPECT_TRUE(a == 0xDEADBEEF0_u(36_W));
-    EXPECT_TRUE(b == 0xDEADBEEF0_u(36_W));
+    EXPECT_TRUE(a == 0xDEADBEEF0_u(36_w));
+    EXPECT_TRUE(b == 0xDEADBEEF0_u(36_w));
 
     b = a << 3;
     a <<= 3;
-    EXPECT_TRUE(a == 0xF56DF7780_u(36_W));
-    EXPECT_TRUE(b == 0xF56DF7780_u(36_W));
+    EXPECT_TRUE(a == 0xF56DF7780_u(36_w));
+    EXPECT_TRUE(b == 0xF56DF7780_u(36_w));
 
     b = a << 9;
     a <<= 9;
-    EXPECT_TRUE(a == 0xDBEEF0000_u(36_W));
-    EXPECT_TRUE(b == 0xDBEEF0000_u(36_W));
+    EXPECT_TRUE(a == 0xDBEEF0000_u(36_w));
+    EXPECT_TRUE(b == 0xDBEEF0000_u(36_w));
 }
 
 TEST(LeftShiftTest, SingleBlockTest)
@@ -683,8 +683,8 @@ TEST(LeftShiftTest, SingleBlockTest)
 
     b = a << 8;
     a <<= 8;
-    EXPECT_TRUE(a == 0xAD00_u(16_W));
-    EXPECT_TRUE(b == 0xAD00_u(16_W));
+    EXPECT_TRUE(a == 0xAD00_u(16_w));
+    EXPECT_TRUE(b == 0xAD00_u(16_w));
 }
 
 TEST(LeftShiftTest, SingleFullBlockTest)
@@ -694,7 +694,7 @@ TEST(LeftShiftTest, SingleFullBlockTest)
 
     b = a << 8;
     a <<= 8;
-    EXPECT_TRUE(a == 0x34567800_u(32_W));
+    EXPECT_TRUE(a == 0x34567800_u(32_w));
 }
 
 TEST(LeftShiftTest, LargeShiftTest)
@@ -704,8 +704,8 @@ TEST(LeftShiftTest, LargeShiftTest)
 
     b = a << 100000;
     a <<= 100000;
-    EXPECT_TRUE(a == 0b00000000_u(8_W));
-    EXPECT_TRUE(b == 0b00000000_u(8_W));
+    EXPECT_TRUE(a == 0b00000000_u(8_w));
+    EXPECT_TRUE(b == 0b00000000_u(8_w));
 }
 
 TEST(ANDTest, ZeroLengthTest)
@@ -729,10 +729,10 @@ TEST(ANDTest, BasicTest)
     bits c{"0o1222"};
 
     a &= b;
-    EXPECT_EQ(a, "0x8AADBAAE020"_u(44_W));
+    EXPECT_EQ(a, "0x8AADBAAE020"_u(44_w));
 
     bits d = a & c;
-    EXPECT_EQ(d, "0x0"_u(44_W));
+    EXPECT_EQ(d, "0x0"_u(44_w));
 }
 
 TEST(ORTest, ZeroLengthTest)
@@ -756,10 +756,10 @@ TEST(ORTest, BasicTest)
     bits c{"0o1222"};
 
     a |= b;
-    EXPECT_EQ(a, "0xFFADBEFFA2C"_u(44_W));
+    EXPECT_EQ(a, "0xFFADBEFFA2C"_u(44_w));
 
     bits d = a | c;
-    EXPECT_EQ(d, "0xFFADBEFFABE"_u(44_W));
+    EXPECT_EQ(d, "0xFFADBEFFABE"_u(44_w));
 }
 
 TEST(XORTest, ZeroLengthTest)
@@ -783,10 +783,10 @@ TEST(XORTest, BasicTest)
     bits c{"0o1222"};
 
     a ^= b;
-    EXPECT_EQ(a, "0x75000451A0C"_u(44_W));
+    EXPECT_EQ(a, "0x75000451A0C"_u(44_w));
 
     bits d = a ^ c;
-    EXPECT_EQ(d, "0x7500045189E"_u(44_W));
+    EXPECT_EQ(d, "0x7500045189E"_u(44_w));
 }
 
 TEST(PlusTest, ZeroLengthTest)
@@ -812,10 +812,10 @@ TEST(PlusTest, BasicTest)
     bits c{"0o1222"};
 
     a += b;
-    EXPECT_EQ(a, "0x8A5B79ADA4C"_u(44_W));
+    EXPECT_EQ(a, "0x8A5B79ADA4C"_u(44_w));
 
     bits d = a + c;
-    EXPECT_EQ(d, "0x8A5B79ADCDE"_u(44_W));
+    EXPECT_EQ(d, "0x8A5B79ADCDE"_u(44_w));
 }
 
 TEST(SubtractTest, ZeroLengthTest)
@@ -841,10 +841,10 @@ TEST(SubtractTest, BasicTest)
     bits c{"0o1222"};
 
     a -= b;
-    EXPECT_EQ(a, "0x330004309FC"_u(44_W));
+    EXPECT_EQ(a, "0x330004309FC"_u(44_w));
 
     a -= b;
-    EXPECT_EQ(a, "0x875249721d4"_u(44_W));
+    EXPECT_EQ(a, "0x875249721d4"_u(44_w));
 }
 
 TEST(NOTTest, ZeroLengthTest)
@@ -1031,7 +1031,7 @@ TEST(GetNBitsTEST, BasicTest)
 TEST(ToUInt64Test, BasicTest)
 {
     using namespace bitsel::utils;
-    bits b = 0xDEADBEEF_u(32_W);
+    bits b = 0xDEADBEEF_u(32_w);
     uint32_t val = b.to_uint64();
 
     EXPECT_EQ(val, 0xDEADBEEF);
@@ -1045,6 +1045,6 @@ TEST(CountTest, BasicTest)
     bits b2 = bits::ones(16);
     EXPECT_EQ(b2.count(), 16);
 
-    bits b3 = "0xDEADBEEF"_u(32_W);
+    bits b3 = "0xDEADBEEF"_u(32_w);
     EXPECT_EQ(b3.count(), 24);
 }
