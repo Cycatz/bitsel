@@ -23,13 +23,13 @@ int main()
     bits a = bits::ones(16);
 
     // Create a 32-bit variable b which contains 0xDEADBEEF
-    bits b = "0xDEADBEEF"_U(32_W);
+    bits b = "0xDEADBEEF"_u(32_w);
 
     // Create a 20-bit variable c which contains 0b101010
     bits c{20, 0b101010};
 
     // Create a 24-bit variable d which contains 0x101010
-    bits d = Fill(3, 0x10_U());
+    bits d = fill(3, 0x10_u());
 
     // Create a variable e which is the concatenation of a, b, c and d
     bits e = {a, b, c, d};

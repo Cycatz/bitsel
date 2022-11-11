@@ -837,13 +837,13 @@ bits bits::operator~() const
     return b;
 }
 
-bits Fill(uint64_t times, bits b)
+bits fill(uint64_t times, bits b)
 {
     return b.repeat(times);
 }
 
 
-bits Cat(const bits &lhs, bits rhs)
+bits cat(const bits &lhs, bits rhs)
 {
     rhs.append(lhs);
     return rhs;
@@ -871,17 +871,21 @@ auto operator"" _W(unsigned long long len)
     return bitwidth(len);
 }
 
-auto operator"" _U(unsigned long long val)
+auto operator"" _u(unsigned long long val)
 {
-    return [=](bitwidth w = bitwidth{}) { return w.empty ? bits{val} : bits{w.width, val}; };
+    return [=](bitwidth w = bitwidth{}) {
+        return w.empty ? bits{val} : bits{w.width, val};
+    };
 }
 
-auto operator"" _S(unsigned long long val)
+auto operator"" _s(unsigned long long val)
 {
-    return [=](bitwidth w = bitwidth{}) { return w.empty ? bits{val} : bits{w.width, val}; };
+    return [=](bitwidth w = bitwidth{}) {
+        return w.empty ? bits{val} : bits{w.width, val};
+    };
 }
 
-auto operator"" _U(const char *str, std::size_t sz)
+auto operator"" _u(const char *str, std::size_t sz)
 {
     return [=](bitwidth w = bitwidth{}) {
         return w.empty ? bits{std::string{str, sz}}
@@ -889,7 +893,7 @@ auto operator"" _U(const char *str, std::size_t sz)
     };
 }
 
-auto operator"" _S(const char *str, std::size_t sz)
+auto operator"" _s(const char *str, std::size_t sz)
 {
     return [=](bitwidth w = bitwidth{}) {
         return w.empty ? bits{std::string{str, sz}}

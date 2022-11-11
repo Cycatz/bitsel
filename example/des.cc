@@ -209,13 +209,13 @@ bits get_new_r(const bits &l, const bits &r, const bits &k)
         bits b = ke(6 * (i + 1) - 1, 6 * i);
 
         /* Interpret as integers instead of bits */
-        std::size_t row = Cat(b(5, 5), b(0, 0)).reverse().to_uint64();
+        std::size_t row = cat(b(5, 5), b(0, 0)).reverse().to_uint64();
         std::size_t col = b(4, 1).reverse().to_uint64();
 
         bits a = bits{4, S[i][col][row]};
         a = a.reverse();
 
-        sb = Cat(a, sb);
+        sb = cat(a, sb);
     }
     std::cout << "sb = " << sb.reverse().to_string() << std::endl;
 
@@ -263,11 +263,11 @@ bits DES(const bits &data, const bits &key)
 
         // Right rotate
         uint32_t shift = Shift[rnd];
-        c = Cat(c(shift - 1, 0), c(28 - 1, shift));
-        d = Cat(d(shift - 1, 0), d(28 - 1, shift));
+        c = cat(c(shift - 1, 0), c(28 - 1, shift));
+        d = cat(d(shift - 1, 0), d(28 - 1, shift));
 
         // cd means c is in the lower bit position
-        bits cd = Cat(d, c);
+        bits cd = cat(d, c);
         std::cout << "cd = " << cd.reverse().to_string() << std::endl;
 
         bits k = bits::zeros(48);
@@ -285,7 +285,7 @@ bits DES(const bits &data, const bits &key)
     std::cout << "l = " << l.reverse().to_string() << std::endl;
     std::cout << "r = " << r.reverse().to_string() << std::endl;
 
-    bits res = Cat(l, r);
+    bits res = cat(l, r);
 
 
     // Final Permutation
@@ -301,8 +301,8 @@ int main()
     // The first bit of data is "0". The last bit is "0". We read from left to
     // right. So we need to reverse the bitstring at initialization and when
     // printing
-    bits data = "0x0123456789ABCDEF"_U().reverse();
-    bits key = "0x133457799BBCDFF1"_U().reverse();
+    bits data = "0x0123456789ABCDEF"_u().reverse();
+    bits key = "0x133457799BBCDFF1"_u().reverse();
 
     std::cout << "Data = " << data.reverse().to_string() << std::endl;
     std::cout << "Key = " << key.reverse().to_string() << std::endl;

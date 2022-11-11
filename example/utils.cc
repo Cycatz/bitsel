@@ -14,7 +14,7 @@ bits byteswap(const bits &b)
 
 bits sign_extension(const bits &b)
 {
-    return Cat(Fill(32, b(31, 31)), b);
+    return cat(fill(32, b(31, 31)), b);
 }
 
 
